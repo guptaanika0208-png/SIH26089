@@ -40,4 +40,38 @@ const registerWorker = async (req, res) => {
   }
 };
 
-module.exports = { registerWorker };
+const loginWorker = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const worker = await Worker.findOne({ email });
+    if (!worker) {
+      return res.status(404).json({ message: 'Worker not found' });
+    }
+
+    const isMatch = await bcrypt.compare(password, worker.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: worker._id, role: 'worker' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      worker: {
+        id: worker._id,
+        name: worker.name,
+        email: worker.email
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { registerWorker, loginWorker };

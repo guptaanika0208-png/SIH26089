@@ -1,5 +1,6 @@
 const Cooperative = require('../models/Cooperative');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const registerCooperative = async (req, res) => {
   try {
@@ -35,4 +36,38 @@ const registerCooperative = async (req, res) => {
   }
 };
 
-module.exports = { registerCooperative };
+const loginCooperative = async (req, res) => {
+  try {
+    const { adminEmail, password } = req.body;
+
+    const cooperative = await Cooperative.findOne({ adminEmail });
+    if (!cooperative) {
+      return res.status(404).json({ message: 'Cooperative not found' });
+    }
+
+    const isMatch = await bcrypt.compare(password, cooperative.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: cooperative._id, role: 'cooperative' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      cooperative: {
+        id: cooperative._id,
+        name: cooperative.name,
+        adminEmail: cooperative.adminEmail
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { registerCooperative, loginCooperative };

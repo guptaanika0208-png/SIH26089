@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { registerCooperative } = require('../controllers/cooperativeController');
+const { registerCooperative, loginCooperative } = require('../controllers/cooperativeController');
 
 router.post('/register', registerCooperative);
+router.post('/login', loginCooperative);
 
 module.exports = router;
