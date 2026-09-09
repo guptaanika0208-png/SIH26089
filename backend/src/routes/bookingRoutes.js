@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { createBooking, assignWorker } = require('../controllers/bookingController');
+const { createBooking, assignWorker, autoAssignWorker } = require('../controllers/bookingController');
 
 router.post('/create', createBooking);
-router.patch('/:bookingId/assign', assignWorker);
+router.patch('/:bookingId/assign', assignWorker);  //manual
+router.patch('/:bookingId/auto-assign', autoAssignWorker);
 
 module.exports = router;

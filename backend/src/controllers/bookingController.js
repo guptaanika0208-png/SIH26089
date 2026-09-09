@@ -2,6 +2,7 @@ const Booking = require('../models/Booking');
 const Customer = require('../models/Customer');
 const Cooperative = require('../models/Cooperative');
 const Worker = require('../models/Worker');
+const { findBestWorker } = require('../services/allocationEngine');
 
 const createBooking = async (req, res) => {
   try {
@@ -84,4 +85,41 @@ const assignWorker = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, assignWorker };
+const autoAssignWorker = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const result = await findBestWorker(booking);
+    if (!result) {
+      return res.status(404).json({ message: 'No eligible worker found for this booking' });
+    }
+
+    const { worker, distance, totalScore } = result;
+
+    booking.worker = worker._id;
+    booking.status = 'assigned';
+    await booking.save();
+
+    worker.currentWorkload += 1;
+    await worker.save();
+
+    res.status(200).json({
+      message: 'Worker auto-assigned successfully',
+      booking,
+      matchDetails: {
+        workerName: worker.name,
+        distanceKm: distance.toFixed(2),
+        matchScore: totalScore.toFixed(2)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { createBooking, assignWorker, autoAssignWorker };
