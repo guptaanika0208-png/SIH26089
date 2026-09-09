@@ -1,0 +1,41 @@
+const Customer = require('../models/Customer');
+const bcrypt = require('bcryptjs');
+
+const registerCustomer = async (req, res) => {
+  try {
+    const { type, email, password, phone, location, name, organizationName, contactPerson, registrationNumber } = req.body;
+
+    const existing = await Customer.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: 'Customer already registered with this email' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const customer = await Customer.create({
+      type,
+      email,
+      password: hashedPassword,
+      phone,
+      location,
+      name,
+      organizationName,
+      contactPerson,
+      registrationNumber
+    });
+
+    res.status(201).json({
+      message: 'Customer registered successfully',
+      customer: {
+        id: customer._id,
+        type: customer.type,
+        email: customer.email
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { registerCustomer };

@@ -13,6 +13,15 @@ app.get('/', (req, res) => {
   res.send('backend running');
 });
 
+const workerRoutes = require('./src/routes/workerRoutes');
+app.use('/api/workers', workerRoutes);
+
+const cooperativeRoutes = require('./src/routes/cooperativeRoutes');
+app.use('/api/cooperatives', cooperativeRoutes);
+
+const customerRoutes = require('./src/routes/customerRoutes');
+app.use('/api/customers', customerRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
