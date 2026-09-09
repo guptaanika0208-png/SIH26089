@@ -25,6 +25,9 @@ app.use('/api/customers', customerRoutes);
 const bookingRoutes = require('./src/routes/bookingRoutes');
 app.use('/api/bookings', bookingRoutes);
 
+const subscriptionRoutes = require('./src/routes/subscriptionRoutes');
+app.use('/api/subscriptions', subscriptionRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
