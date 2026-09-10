@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getWorkerBookings } from '../../services/bookingService';
+import LogoutButton from '../../components/LogoutButton';
 
 function WorkerDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -23,6 +24,7 @@ function WorkerDashboard() {
   return (
     <div style={{ maxWidth: '700px', margin: '30px auto', padding: '20px' }}>
       <h2>Welcome, {worker?.name}</h2>
+      <LogoutButton />
       <p>Total Jobs: {bookings.length}</p>
 
       <h3>Your Jobs</h3>

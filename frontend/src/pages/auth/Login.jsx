@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 function Login() {
   const [role, setRole] = useState('worker');
@@ -8,6 +9,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,11 +20,9 @@ function Login() {
       const credentials = { [emailField]: email, password };
 
       const data = await loginUser(role, credentials);
+      const userData = data[role] || data.worker || data.customer || data.cooperative;
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('role', role);
-      localStorage.setItem('user', JSON.stringify(data[role] || data.worker || data.customer || data.cooperative));
-
+      login(userData, role, data.token);
       navigate(`/${role}/dashboard`);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
@@ -62,6 +62,14 @@ function Login() {
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <p style={{ marginTop: '15px' }}>
+        New worker? <a href="/signup/worker">Sign up here</a>
+      </p>
+
+      <p style={{ marginTop: '15px' }}>
+        New customer? <a href="/signup/customer">Sign up here</a>
+      </p>
     </div>
   );
 }

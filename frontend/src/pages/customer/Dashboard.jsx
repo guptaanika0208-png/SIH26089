@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getCustomerBookings } from '../../services/bookingService';
 import { useNavigate } from 'react-router-dom';
+import LogoutButton from '../../components/LogoutButton';
 
 function CustomerDashboard() {
   const navigate = useNavigate();
@@ -25,9 +26,17 @@ function CustomerDashboard() {
   return (
     <div style={{ maxWidth: '700px', margin: '30px auto', padding: '20px' }}>
       <h2>Welcome, {customer?.name || customer?.organizationName || customer?.email}</h2>
-      <button onClick={() => navigate('/customer/book')} style={{ padding: '10px', marginBottom: '20px' }}>
-        Book a New Service
-      </button>
+      <LogoutButton />
+      {customer?.type === 'institutional' ? (
+        <button onClick={() => navigate('/customer/contract')} style={{ padding: '10px', marginBottom: '20px' }}>
+          Request Workforce Contract
+        </button>
+      ) : (
+        <button onClick={() => navigate('/customer/book')} style={{ padding: '10px', marginBottom: '20px' }}>
+          Book a New Service
+        </button>
+      )}
+
       <p>Total Bookings: {bookings.length}</p>
 
       <h3>Your Bookings</h3>

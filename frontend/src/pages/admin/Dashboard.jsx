@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getCooperativeBookings } from '../../services/bookingService';
 import { getCooperativeWorkers } from '../../services/cooperativeService';
+import LogoutButton from '../../components/LogoutButton';
 
 function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -34,6 +35,7 @@ function AdminDashboard() {
   return (
     <div style={{ maxWidth: '900px', margin: '30px auto', padding: '20px' }}>
       <h2>{cooperative?.name} — Admin Dashboard</h2>
+      <LogoutButton />
 
       <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
         <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
