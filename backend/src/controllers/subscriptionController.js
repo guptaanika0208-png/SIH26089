@@ -50,4 +50,25 @@ const createSubscription = async (req, res) => {
   }
 };
 
-module.exports = { createSubscription };
+const getCustomerSubscriptions = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const subscriptions = await Subscription.find({ customer: customerId });
+    res.status(200).json({ subscriptions });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const getCooperativeSubscriptions = async (req, res) => {
+  try {
+    const { cooperativeId } = req.params;
+    const subscriptions = await Subscription.find({ cooperative: cooperativeId })
+      .populate('customer', 'name organizationName email');
+    res.status(200).json({ subscriptions });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { createSubscription, getCustomerSubscriptions, getCooperativeSubscriptions };

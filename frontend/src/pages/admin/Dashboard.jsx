@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { getCooperativeBookings } from '../../services/bookingService';
 import { getCooperativeWorkers } from '../../services/cooperativeService';
 import LogoutButton from '../../components/LogoutButton';
+import { getCooperativeSubscriptions } from '../../services/subscriptionService';
 
 function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [cooperative, setCooperative] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [subscriptions, setSubscriptions] = useState([]);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -16,11 +18,13 @@ function AdminDashboard() {
     if (storedUser?.id) {
       Promise.all([
         getCooperativeBookings(storedUser.id),
-        getCooperativeWorkers(storedUser.id)
+        getCooperativeWorkers(storedUser.id),
+        getCooperativeSubscriptions(storedUser.id)
       ])
-        .then(([bookingData, workerData]) => {
+        .then(([bookingData, workerData, subscriptionData]) => {
           setBookings(bookingData.bookings);
           setWorkers(workerData.workers);
+          setSubscriptions(subscriptionData.subscriptions);
         })
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
@@ -54,6 +58,10 @@ function AdminDashboard() {
           <p>Total Bookings</p>
           <h3>{bookings.length}</h3>
         </div>
+        <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
+          <p>Active Contracts</p>
+          <h3>{subscriptions.filter(s => s.status === 'active').length}</h3>
+        </div>
       </div>
 
       <h3>Worker Roster</h3>
@@ -67,6 +75,17 @@ function AdminDashboard() {
       {bookings.map((b) => (
         <div key={b._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '10px', marginBottom: '8px' }}>
           <p><strong>Service:</strong> {b.serviceType} — <strong>Status:</strong> {b.status} — <strong>Worker:</strong> {b.worker ? b.worker.name : 'Unassigned'}</p>
+        </div>
+      ))}
+
+      <h3>Subscriptions / Contracts</h3>
+      {subscriptions.map((s) => (
+        <div key={s._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '10px', marginBottom: '8px' }}>
+          <p>
+            <strong>{s.serviceType}</strong> — {s.contractType} ({s.frequency}) —
+            Customer: {s.customer?.name || s.customer?.organizationName} —
+            Workers Needed: {s.workersRequired} — Status: {s.status}
+          </p>
         </div>
       ))}
     </div>
