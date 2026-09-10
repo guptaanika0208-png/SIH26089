@@ -122,4 +122,42 @@ const autoAssignWorker = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, assignWorker, autoAssignWorker };
+const getWorkerBookings = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const bookings = await Booking.find({ worker: workerId }).populate('customer', 'name organizationName email');
+    res.status(200).json({ bookings });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+const getCustomerBookings = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const bookings = await Booking.find({ customer: customerId }).populate('worker', 'name phone rating');
+    res.status(200).json({ bookings });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const getCooperativeBookings = async (req, res) => {
+  try {
+    const { cooperativeId } = req.params;
+    const bookings = await Booking.find({ cooperative: cooperativeId })
+      .populate('customer', 'name organizationName email')
+      .populate('worker', 'name phone');
+    res.status(200).json({ bookings });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  createBooking,
+  assignWorker,
+  autoAssignWorker,
+  getWorkerBookings,
+  getCustomerBookings,
+  getCooperativeBookings
+};

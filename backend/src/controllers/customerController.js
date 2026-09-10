@@ -65,7 +65,9 @@ const loginCustomer = async (req, res) => {
       customer: {
         id: customer._id,
         type: customer.type,
-        email: customer.email
+        email: customer.email,
+        name: customer.name,
+        organizationName: customer.organizationName
       }
     });
   } catch (error) {

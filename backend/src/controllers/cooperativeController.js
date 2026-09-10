@@ -1,6 +1,7 @@
 const Cooperative = require('../models/Cooperative');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Worker = require('../models/Worker');
 
 const registerCooperative = async (req, res) => {
   try {
@@ -70,4 +71,15 @@ const loginCooperative = async (req, res) => {
   }
 };
 
-module.exports = { registerCooperative, loginCooperative };
+const getCooperativeWorkers = async (req, res) => {
+  try {
+    const { cooperativeId } = req.params;
+    const workers = await Worker.find({ cooperative: cooperativeId });
+    res.status(200).json({ workers });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { registerCooperative, loginCooperative, getCooperativeWorkers };
+
