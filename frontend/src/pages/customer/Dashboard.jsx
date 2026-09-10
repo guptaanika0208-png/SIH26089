@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getCustomerBookings } from '../../services/bookingService';
+import { useNavigate } from 'react-router-dom';
 
 function CustomerDashboard() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,9 @@ function CustomerDashboard() {
   return (
     <div style={{ maxWidth: '700px', margin: '30px auto', padding: '20px' }}>
       <h2>Welcome, {customer?.name || customer?.organizationName || customer?.email}</h2>
+      <button onClick={() => navigate('/customer/book')} style={{ padding: '10px', marginBottom: '20px' }}>
+        Book a New Service
+      </button>
       <p>Total Bookings: {bookings.length}</p>
 
       <h3>Your Bookings</h3>
