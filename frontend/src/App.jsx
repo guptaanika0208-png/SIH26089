@@ -9,6 +9,7 @@ import BookService from './pages/customer/BookService';
 import WorkerSignup from './pages/auth/WorkerSignup';
 import CustomerSignup from './pages/auth/CustomerSignup';
 import RequestContract from './pages/customer/RequestContract';
+import CooperativeSignup from './pages/auth/CooperativeSignup';
 
 function App() {
   
@@ -20,6 +21,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup/worker" element={<WorkerSignup />} />
           <Route path="/signup/customer" element={<CustomerSignup />} />
+          <Route path="/signup/cooperative" element={<CooperativeSignup />} />
 
           <Route path="/worker/dashboard" element={
             <ProtectedRoute allowedRole="worker"><WorkerDashboard /></ProtectedRoute>

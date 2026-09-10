@@ -70,6 +70,10 @@ function Login() {
       <p style={{ marginTop: '15px' }}>
         New customer? <a href="/signup/customer">Sign up here</a>
       </p>
+
+      <p style={{ marginTop: '15px' }}>
+        New cooperative? <a href="/signup/cooperative">Sign up here</a>
+      </p>
     </div>
   );
 }
