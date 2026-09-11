@@ -153,11 +153,68 @@ const getCooperativeBookings = async (req, res) => {
   }
 };
 
+const completeBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    booking.status = 'completed';
+    await booking.save();
+
+    // free up the worker's workload
+    if (booking.worker) {
+      const worker = await Worker.findById(booking.worker);
+      if (worker && worker.currentWorkload > 0) {
+        worker.currentWorkload -= 1;
+        await worker.save();
+      }
+    }
+
+    res.status(200).json({ message: 'Booking marked as completed', booking });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const rateBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { score, review } = req.body;
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    if (booking.status !== 'completed') {
+      return res.status(400).json({ message: 'Can only rate completed bookings' });
+    }
+
+    booking.rating = { score, review: review || '' };
+    await booking.save();
+
+    if (booking.worker) {
+      const worker = await Worker.findById(booking.worker);
+      if (worker) {
+        const newCount = worker.rating.count + 1;
+        const newAverage = ((worker.rating.average * worker.rating.count) + score) / newCount;
+        worker.rating.average = newAverage;
+        worker.rating.count = newCount;
+        await worker.save();
+      }
+    }
+
+    res.status(200).json({ message: 'Rating submitted successfully', booking });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   assignWorker,
   autoAssignWorker,
   getWorkerBookings,
   getCustomerBookings,
-  getCooperativeBookings
+  getCooperativeBookings,
+  completeBooking,
+  rateBooking
 };

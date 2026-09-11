@@ -72,7 +72,7 @@ function AdminDashboard() {
         <div key={w._id} className="card list-item">
           <div className="list-item-main">
             <b>{w.name}</b>
-            <span>Skills: {w.skills.join(', ')} · Workload: {w.currentWorkload}</span>
+            <span>Skills: {w.skills.join(', ')} · Workload: {w.currentWorkload} · ⭐ {w.rating?.average ? w.rating.average.toFixed(1) : 'N/A'} ({w.rating?.count || 0})</span>
           </div>
           <div className="list-item-side">
             <span className={`badge ${w.availability === 'available' ? 'active' : 'pending'}`}>{w.availability}</span>

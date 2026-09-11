@@ -24,3 +24,13 @@ export const autoAssignBooking = async (bookingId) => {
   const response = await api.patch(`/bookings/${bookingId}/auto-assign`);
   return response.data;
 };
+
+export const completeBooking = async (bookingId) => {
+  const response = await api.patch(`/bookings/${bookingId}/complete`);
+  return response.data;
+};
+
+export const rateBooking = async (bookingId, score, review) => {
+  const response = await api.patch(`/bookings/${bookingId}/rate`, { score, review });
+  return response.data;
+};

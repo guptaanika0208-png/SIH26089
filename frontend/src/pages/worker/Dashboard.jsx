@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getWorkerBookings } from '../../services/bookingService';
 import LogoutButton from '../../components/LogoutButton';
 import { getServiceIcon } from '../../utils/serviceIcons';
+import { getWorkerBookings, completeBooking } from '../../services/bookingService';
 
 function WorkerDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -19,6 +19,17 @@ function WorkerDashboard() {
         .finally(() => setLoading(false));
     }
   }, []);
+
+  const handleComplete = async (bookingId) => {
+    try {
+      await completeBooking(bookingId);
+      const updated = await getWorkerBookings(worker.id);
+      setBookings(updated.bookings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
 
@@ -38,6 +49,10 @@ function WorkerDashboard() {
           <b>{bookings.filter(b => b.status === 'assigned').length}</b>
           <small>Active Jobs</small>
         </div>
+        <div className="stat">
+          <b>{worker?.rating?.average ? worker.rating.average.toFixed(1) : 'N/A'} ⭐</b>
+          <small>Rating ({worker?.rating?.count || 0} reviews)</small>
+        </div>
       </div>
 
       <h2>Your Jobs</h2>
@@ -51,7 +66,14 @@ function WorkerDashboard() {
             </span>
           </div>
           <div className="list-item-side">
-            <span className={`badge ${booking.status === 'pending' ? 'pending' : 'assigned'}`}>{booking.status}</span>
+            <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
+              {booking.status}
+            </span>
+            {booking.status === 'assigned' && (
+              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleComplete(booking._id)}>
+                Mark Complete
+              </button>
+            )}
           </div>
         </div>
       ))}

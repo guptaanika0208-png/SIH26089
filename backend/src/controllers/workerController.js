@@ -66,7 +66,8 @@ const loginWorker = async (req, res) => {
       worker: {
         id: worker._id,
         name: worker.name,
-        email: worker.email
+        email: worker.email,
+        rating: worker.rating
       }
     });
   } catch (error) {

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { getCustomerBookings } from '../../services/bookingService';
 import { useNavigate } from 'react-router-dom';
 import LogoutButton from '../../components/LogoutButton';
 import { getCustomerSubscriptions } from '../../services/subscriptionService';
 import { getServiceIcon } from '../../utils/serviceIcons';
+import { getCustomerBookings, rateBooking } from '../../services/bookingService';
 
 function CustomerDashboard() {
   const navigate = useNavigate();
@@ -27,6 +27,24 @@ function CustomerDashboard() {
         .finally(() => setLoading(false));
     }
   }, []);
+
+  const [ratingInputs, setRatingInputs] = useState({});
+
+  const handleRatingChange = (bookingId, value) => {
+    setRatingInputs({ ...ratingInputs, [bookingId]: value });
+  };
+
+  const submitRating = async (bookingId) => {
+    const score = ratingInputs[bookingId];
+    if (!score) return;
+    try {
+      await rateBooking(bookingId, Number(score));
+      const updated = await getCustomerBookings(customer.id);
+      setBookings(updated.bookings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
 
@@ -67,9 +85,29 @@ function CustomerDashboard() {
               Worker: {booking.worker ? booking.worker.name : 'Not assigned yet'} ·{' '}
               {new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime} · ₹{booking.price}
             </span>
+            {booking.status === 'completed' && booking.rating?.score == null && (
+              <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <select onChange={(e) => handleRatingChange(booking._id, e.target.value)} style={{ width: 'auto' }}>
+                  <option value="">Rate...</option>
+                  <option value="1">⭐ 1</option>
+                  <option value="2">⭐⭐ 2</option>
+                  <option value="3">⭐⭐⭐ 3</option>
+                  <option value="4">⭐⭐⭐⭐ 4</option>
+                  <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                </select>
+                <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => submitRating(booking._id)}>
+                  Submit
+                </button>
+              </div>
+            )}
+            {booking.rating?.score != null && (
+              <span className="muted">Your rating: {'⭐'.repeat(booking.rating.score)}</span>
+            )}
           </div>
           <div className="list-item-side">
-            <span className={`badge ${booking.status === 'pending' ? 'pending' : 'assigned'}`}>{booking.status}</span>
+            <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
+              {booking.status}
+            </span>
           </div>
         </div>
       ))}
