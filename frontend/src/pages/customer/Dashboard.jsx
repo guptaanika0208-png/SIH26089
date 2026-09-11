@@ -105,6 +105,9 @@ function CustomerDashboard() {
             )}
           </div>
           <div className="list-item-side">
+            {booking.isEmergency && (
+              <span className="badge" style={{ background: '#fff0eb', color: '#b44835' }}>🚨 Urgent</span>
+            )}
             <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
               {booking.status}
             </span>

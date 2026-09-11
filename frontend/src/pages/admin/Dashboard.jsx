@@ -3,6 +3,7 @@ import { getCooperativeBookings } from '../../services/bookingService';
 import { getCooperativeWorkers } from '../../services/cooperativeService';
 import LogoutButton from '../../components/LogoutButton';
 import { getCooperativeSubscriptions } from '../../services/subscriptionService';
+import { getDemandStats } from '../../services/bookingService';
 import { getServiceIcon } from '../../utils/serviceIcons';
 
 function AdminDashboard() {
@@ -11,6 +12,7 @@ function AdminDashboard() {
   const [cooperative, setCooperative] = useState(null);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [demandByService, setDemandByService] = useState([]);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -20,12 +22,14 @@ function AdminDashboard() {
       Promise.all([
         getCooperativeBookings(storedUser.id),
         getCooperativeWorkers(storedUser.id),
-        getCooperativeSubscriptions(storedUser.id)
+        getCooperativeSubscriptions(storedUser.id),
+        getDemandStats(storedUser.id)
       ])
-        .then(([bookingData, workerData, subscriptionData]) => {
+        .then(([bookingData, workerData, subscriptionData, demandData]) => {
           setBookings(bookingData.bookings);
           setWorkers(workerData.workers);
           setSubscriptions(subscriptionData.subscriptions);
+          setDemandByService(demandData.byService);
         })
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
@@ -80,6 +84,29 @@ function AdminDashboard() {
         </div>
       ))}
 
+      <h2>Demand Trends</h2>
+      <div className="card">
+        {demandByService.length === 0 && <p className="muted">Not enough booking data yet.</p>}
+        {demandByService.map((d) => {
+          const maxCount = Math.max(...demandByService.map(x => x.count));
+          const widthPercent = (d.count / maxCount) * 100;
+          return (
+            <div key={d._id} style={{ marginBottom: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span>{getServiceIcon(d._id)} {d._id}</span>
+                <b>{d.count} booking{d.count !== 1 ? 's' : ''}</b>
+              </div>
+              <div style={{ height: '10px', background: '#e4eee9', borderRadius: '10px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${widthPercent}%`, background: '#278464', borderRadius: '10px' }} />
+              </div>
+            </div>
+          );
+        })}
+        <p className="muted" style={{ fontSize: '0.85em', marginTop: '10px' }}>
+          Based on current booking history. Predictive forecasting will activate as more data accumulates.
+        </p>
+      </div>
+
       <h2>All Bookings</h2>
       {bookings.map((b) => (
         <div key={b._id} className="card list-item">
@@ -88,7 +115,12 @@ function AdminDashboard() {
             <span>Worker: {b.worker ? b.worker.name : 'Unassigned'}</span>
           </div>
           <div className="list-item-side">
-            <span className={`badge ${b.status === 'pending' ? 'pending' : 'assigned'}`}>{b.status}</span>
+            {booking.isEmergency && (
+              <span className="badge" style={{ background: '#fff0eb', color: '#b44835' }}>🚨 Urgent</span>
+            )}
+            <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
+              {booking.status}
+            </span>
           </div>
         </div>
       ))}

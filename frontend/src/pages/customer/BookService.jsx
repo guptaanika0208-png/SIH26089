@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking, autoAssignBooking } from '../../services/bookingService';
-import { getServiceIcon } from '../../utils/serviceIcons';
 
 const hourlyRates = {
   cleaning: 150,
@@ -11,23 +10,37 @@ const hourlyRates = {
   gardening: 120
 };
 
+const EMERGENCY_MULTIPLIER = 1.5;
+
 function BookService() {
   const [serviceType, setServiceType] = useState('cleaning');
   const [duration, setDuration] = useState(1);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  const [isEmergency, setIsEmergency] = useState(false);
   const [price, setPrice] = useState(hourlyRates['cleaning'] * 1);
   const [status, setStatus] = useState('');
   const [matchInfo, setMatchInfo] = useState(null);
   const navigate = useNavigate();
 
   const customer = JSON.parse(localStorage.getItem('user'));
-  const cooperativeId = '6aa1027310b84da7531d606c'; // hardcoded for now — only one cooperative exists
+  const cooperativeId = '6aa1027310b84da7531d606c'; // hardcoded — only one cooperative exists right now
 
-  // recalculate price whenever service type or duration changes
+  // recalculate price whenever service type, duration, or emergency flag changes
   useEffect(() => {
-    setPrice(hourlyRates[serviceType] * duration);
-  }, [serviceType, duration]);
+    const base = hourlyRates[serviceType] * duration;
+    setPrice(isEmergency ? Math.round(base * EMERGENCY_MULTIPLIER) : base);
+  }, [serviceType, duration, isEmergency]);
+
+  // when emergency is checked, force scheduledDate to today (no advance scheduling for emergencies)
+  useEffect(() => {
+    if (isEmergency) {
+      const today = new Date().toISOString().split('T')[0];
+      setScheduledDate(today);
+    }
+  }, [isEmergency]);
+
+  const today = new Date().toISOString().split('T')[0];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +52,7 @@ function BookService() {
         customer: customer.id,
         cooperative: cooperativeId,
         serviceType,
-        isEmergency: false,
+        isEmergency,
         location: {
           city: 'Delhi',
           coordinates: { coordinates: [77.209, 28.6139] } // hardcoded for now
@@ -68,11 +81,11 @@ function BookService() {
 
       <form onSubmit={handleSubmit}>
         <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
-          <option value="cleaning">Cleaning</option>
-          <option value="plumbing">Plumbing</option>
-          <option value="electrical">Electrical</option>
-          <option value="elder care">Elder Care</option>
-          <option value="gardening">Gardening</option>
+          <option value="cleaning">🧹 Cleaning</option>
+          <option value="plumbing">🔧 Plumbing</option>
+          <option value="electrical">⚡ Electrical</option>
+          <option value="elder care">👵 Elder Care</option>
+          <option value="gardening">🌱 Gardening</option>
         </select>
 
         <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
@@ -86,8 +99,10 @@ function BookService() {
           type="date"
           value={scheduledDate}
           onChange={(e) => setScheduledDate(e.target.value)}
+          min={today}
+          max={isEmergency ? today : undefined}
+          disabled={isEmergency}
           required
-          
         />
 
         <input
@@ -96,18 +111,33 @@ function BookService() {
           value={scheduledTime}
           onChange={(e) => setScheduledTime(e.target.value)}
           required
-
         />
 
-        <div className="card" style={{ padding: '12px', marginBottom: '12px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', textAlign: 'left' }}>
+          <input
+            type="checkbox"
+            checked={isEmergency}
+            onChange={(e) => setIsEmergency(e.target.checked)}
+            style={{ width: 'auto', margin: 0 }}
+          />
+          🚨 This is an emergency (urgent, needs immediate attention)
+        </label>
+
+        {isEmergency && (
+          <p className="muted" style={{ fontSize: '0.85em', marginTop: '-6px', marginBottom: '10px', textAlign: 'left' }}>
+            Emergency requests are scheduled for today and matched to the nearest available worker. A +50% urgency surcharge applies.
+          </p>
+        )}
+
+        <div className="card" style={{ padding: '12px', marginBottom: '12px', textAlign: 'left' }}>
           <strong>Price:</strong> ₹{price}{' '}
           <span className="muted" style={{ fontSize: '0.85em' }}>
-            (₹{hourlyRates[serviceType]}/hr × {duration}hr — cooperative rate card)
+            (₹{hourlyRates[serviceType]}/hr × {duration}hr{isEmergency ? ' × 1.5 emergency surcharge' : ''} — cooperative rate card)
           </span>
         </div>
 
         <button type="submit" className="primary">
-          Book Now
+          {isEmergency ? '🚨 Request Emergency Service' : 'Book Now'}
         </button>
       </form>
 

@@ -34,3 +34,8 @@ export const rateBooking = async (bookingId, score, review) => {
   const response = await api.patch(`/bookings/${bookingId}/rate`, { score, review });
   return response.data;
 };
+
+export const getDemandStats = async (cooperativeId) => {
+  const response = await api.get(`/bookings/demand/${cooperativeId}`);
+  return response.data;
+};

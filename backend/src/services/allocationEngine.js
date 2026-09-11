@@ -4,7 +4,7 @@ const Worker = require('../models/Worker');
 function calculateDistance(coords1, coords2) {
   const [lon1, lat1] = coords1;
   const [lon2, lat2] = coords2;
-  const R = 6371; // Earth radius in km
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a =
@@ -16,7 +16,6 @@ function calculateDistance(coords1, coords2) {
   return R * c;
 }
 
-// Finds and scores the best worker for a booking
 async function findBestWorker(booking) {
   const eligibleWorkers = await Worker.find({
     cooperative: booking.cooperative,
@@ -28,14 +27,25 @@ async function findBestWorker(booking) {
 
   const bookingCoords = booking.location.coordinates.coordinates;
 
+  // Emergency bookings: pure distance-priority matching, skip fairness/workload weighting
+  if (booking.isEmergency) {
+    const scored = eligibleWorkers.map((worker) => {
+      const workerCoords = worker.location.coordinates.coordinates;
+      const distance = calculateDistance(bookingCoords, workerCoords);
+      return { worker, distance, totalScore: Math.max(0, 100 - distance * 2) };
+    });
+    scored.sort((a, b) => a.distance - b.distance);
+    return scored[0];
+  }
+
+  // Normal bookings: weighted scoring (distance + workload + fairness)
   const scored = eligibleWorkers.map((worker) => {
     const workerCoords = worker.location.coordinates.coordinates;
     const distance = calculateDistance(bookingCoords, workerCoords);
 
-    // scoring — tweak weights as needed
-    const distanceScore = Math.max(0, 100 - distance * 2); // closer = higher, caps at 0
-    const workloadScore = Math.max(0, 100 - worker.currentWorkload * 10); // less busy = higher
-    const fairnessScore = Math.max(0, 100 - worker.utilizationScore); // less utilized = higher
+    const distanceScore = Math.max(0, 100 - distance * 2);
+    const workloadScore = Math.max(0, 100 - worker.currentWorkload * 10);
+    const fairnessScore = Math.max(0, 100 - worker.utilizationScore);
 
     const totalScore =
       distanceScore * 0.4 + workloadScore * 0.35 + fairnessScore * 0.25;
@@ -45,7 +55,7 @@ async function findBestWorker(booking) {
 
   scored.sort((a, b) => b.totalScore - a.totalScore);
 
-  return scored[0]; // best match
+  return scored[0];
 }
 
 module.exports = { findBestWorker, calculateDistance };

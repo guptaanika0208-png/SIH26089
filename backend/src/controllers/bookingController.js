@@ -208,6 +208,28 @@ const rateBooking = async (req, res) => {
   }
 };
 
+const getDemandStats = async (req, res) => {
+  try {
+    const { cooperativeId } = req.params;
+
+    const byService = await Booking.aggregate([
+      { $match: { cooperative: new (require('mongoose').Types.ObjectId)(cooperativeId) } },
+      { $group: { _id: '$serviceType', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    const byCity = await Booking.aggregate([
+      { $match: { cooperative: new (require('mongoose').Types.ObjectId)(cooperativeId) } },
+      { $group: { _id: '$location.city', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    res.status(200).json({ byService, byCity });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   assignWorker,
@@ -216,5 +238,6 @@ module.exports = {
   getCustomerBookings,
   getCooperativeBookings,
   completeBooking,
-  rateBooking
+  rateBooking,
+  getDemandStats
 };
