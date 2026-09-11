@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getCooperativeBookings } from '../../services/bookingService';
 import { getCooperativeWorkers } from '../../services/cooperativeService';
 import LogoutButton from '../../components/LogoutButton';
@@ -7,6 +8,7 @@ import { getDemandStats } from '../../services/bookingService';
 import { getServiceIcon } from '../../utils/serviceIcons';
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [cooperative, setCooperative] = useState(null);
@@ -72,8 +74,14 @@ function AdminDashboard() {
       </div>
 
       <h2>Worker Roster</h2>
+      <p className="muted" style={{ marginTop: '-8px', fontSize: '0.85em' }}>Click a worker to view their full profile</p>
       {workers.map((w) => (
-        <div key={w._id} className="card list-item">
+        <div
+          key={w._id}
+          className="card list-item"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/cooperative/worker/${w._id}`)}
+        >
           <div className="list-item-main">
             <b>{w.name}</b>
             <span>Skills: {w.skills.join(', ')} · Workload: {w.currentWorkload} · ⭐ {w.rating?.average ? w.rating.average.toFixed(1) : 'N/A'} ({w.rating?.count || 0})</span>
@@ -111,16 +119,14 @@ function AdminDashboard() {
       {bookings.map((b) => (
         <div key={b._id} className="card list-item">
           <div className="list-item-main">
-            <strong>Service:</strong> {getServiceIcon(b.serviceType)} {b.serviceType}
+            <b>{getServiceIcon(b.serviceType)} {b.serviceType}</b>
             <span>Worker: {b.worker ? b.worker.name : 'Unassigned'}</span>
           </div>
           <div className="list-item-side">
-            {booking.isEmergency && (
+            {b.isEmergency && (
               <span className="badge" style={{ background: '#fff0eb', color: '#b44835' }}>🚨 Urgent</span>
             )}
-            <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
-              {booking.status}
-            </span>
+            <span className={`badge ${b.status === 'pending' ? 'pending' : 'assigned'}`}>{b.status}</span>
           </div>
         </div>
       ))}

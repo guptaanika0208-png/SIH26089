@@ -66,6 +66,11 @@ const bookingSchema = new mongoose.Schema({
     default: 'pending'
   },
 
+  earningsBreakdown: {
+    platformFee: { type: Number, default: 0 },
+    workerEarning: { type: Number, default: 0 }
+  },
+
   rating: {
     score: {
       type: Number, // 1-5

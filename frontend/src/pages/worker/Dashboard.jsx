@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import LogoutButton from '../../components/LogoutButton';
 import { getServiceIcon } from '../../utils/serviceIcons';
 import { getWorkerBookings, completeBooking } from '../../services/bookingService';
+import { useNavigate } from 'react-router-dom';
 
 function WorkerDashboard() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,12 @@ function WorkerDashboard() {
     <div className="app-shell">
       <div className="topbar">
         <div className="brand">Welcome, {worker?.name}</div>
-        <LogoutButton />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="outline" style={{ width: 'auto', padding: '8px 14px' }} onClick={() => navigate(`/cooperative/worker/${worker.id}`)}>
+            View My Profile
+          </button>
+          <LogoutButton />
+        </div>
       </div>
 
       <div className="stats-row">

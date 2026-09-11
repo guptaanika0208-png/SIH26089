@@ -1,7 +1,7 @@
 const Cooperative = require('../models/Cooperative');
+const Worker = require('../models/Worker');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Worker = require('../models/Worker');
 
 const registerCooperative = async (req, res) => {
   try {
@@ -81,5 +81,48 @@ const getCooperativeWorkers = async (req, res) => {
   }
 };
 
-module.exports = { registerCooperative, loginCooperative, getCooperativeWorkers };
+const getWorkerById = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ message: 'Worker not found' });
+    res.status(200).json({ worker });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
+// Public — used by the signup page dropdown, no auth needed
+const listCooperatives = async (req, res) => {
+  try {
+    const cooperatives = await Cooperative.find().select('name _id');
+    res.status(200).json({ cooperatives });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Cooperative admin toggles a worker's verified status
+const verifyWorker = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ message: 'Worker not found' });
+
+    worker.isVerified = !worker.isVerified;
+    await worker.save();
+
+    res.status(200).json({ message: 'Worker verification updated', worker });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  registerCooperative,
+  loginCooperative,
+  getCooperativeWorkers,
+  getWorkerById,
+  listCooperatives,
+  verifyWorker
+};

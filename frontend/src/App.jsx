@@ -10,6 +10,7 @@ import WorkerSignup from './pages/auth/WorkerSignup';
 import CustomerSignup from './pages/auth/CustomerSignup';
 import RequestContract from './pages/customer/RequestContract';
 import CooperativeSignup from './pages/auth/CooperativeSignup';
+import WorkerProfile from './pages/admin/WorkerProfile';
 
 function App() {
   
@@ -41,6 +42,10 @@ function App() {
 
           <Route path="/cooperative/dashboard" element={
             <ProtectedRoute allowedRole="cooperative"><AdminDashboard /></ProtectedRoute>
+          } />
+
+          <Route path="/cooperative/worker/:workerId" element={
+            <ProtectedRoute><WorkerProfile /></ProtectedRoute>
           } />
         </Routes>
       </BrowserRouter>

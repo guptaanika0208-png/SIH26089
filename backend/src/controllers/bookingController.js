@@ -4,6 +4,8 @@ const Cooperative = require('../models/Cooperative');
 const Worker = require('../models/Worker');
 const { findBestWorker } = require('../services/allocationEngine');
 
+const PLATFORM_FEE_PERCENT = 0.15; // cooperative/platform takes 15%, worker keeps 85%
+
 const createBooking = async (req, res) => {
   try {
     const {
@@ -50,7 +52,6 @@ const createBooking = async (req, res) => {
   }
 };
 
-
 // Manually assign a worker to a booking
 const assignWorker = async (req, res) => {
   try {
@@ -85,6 +86,8 @@ const assignWorker = async (req, res) => {
   }
 };
 
+// AI-based auto-assignment — findBestWorker internally applies distance-priority
+// scoring when booking.isEmergency is true, otherwise uses the normal weighted formula
 const autoAssignWorker = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -131,6 +134,7 @@ const getWorkerBookings = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 const getCustomerBookings = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -153,6 +157,9 @@ const getCooperativeBookings = async (req, res) => {
   }
 };
 
+// Marks a booking complete and splits the payment: platform fee stays with the
+// cooperative, the rest is added to the worker's total earnings — stored on the
+// booking itself (earningsBreakdown) so the split is transparent and auditable.
 const completeBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -160,13 +167,19 @@ const completeBooking = async (req, res) => {
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
 
     booking.status = 'completed';
+
+    const platformFee = Math.round(booking.price * PLATFORM_FEE_PERCENT);
+    const workerEarning = booking.price - platformFee;
+    booking.earningsBreakdown = { platformFee, workerEarning };
+
     await booking.save();
 
-    // free up the worker's workload
+    // free up the worker's workload and credit their earnings
     if (booking.worker) {
       const worker = await Worker.findById(booking.worker);
-      if (worker && worker.currentWorkload > 0) {
-        worker.currentWorkload -= 1;
+      if (worker) {
+        if (worker.currentWorkload > 0) worker.currentWorkload -= 1;
+        worker.earnings.total = (worker.earnings.total || 0) + workerEarning;
         await worker.save();
       }
     }

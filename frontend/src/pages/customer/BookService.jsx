@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking, autoAssignBooking } from '../../services/bookingService';
+import { getServiceIcon } from '../../utils/serviceIcons';
 
 const hourlyRates = {
   cleaning: 150,
@@ -11,26 +12,21 @@ const hourlyRates = {
 };
 
 const EMERGENCY_MULTIPLIER = 1.5;
+const allServices = Object.keys(hourlyRates);
 
 function BookService() {
-  const [serviceType, setServiceType] = useState('cleaning');
+  // customer can now select multiple services in one go — each becomes its own booking
+  const [selectedServices, setSelectedServices] = useState(['cleaning']);
   const [duration, setDuration] = useState(1);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
   const [isEmergency, setIsEmergency] = useState(false);
-  const [price, setPrice] = useState(hourlyRates['cleaning'] * 1);
   const [status, setStatus] = useState('');
-  const [matchInfo, setMatchInfo] = useState(null);
+  const [results, setResults] = useState([]); // holds per-service booking/match results after submit
   const navigate = useNavigate();
 
   const customer = JSON.parse(localStorage.getItem('user'));
   const cooperativeId = '6aa1027310b84da7531d606c'; // hardcoded — only one cooperative exists right now
-
-  // recalculate price whenever service type, duration, or emergency flag changes
-  useEffect(() => {
-    const base = hourlyRates[serviceType] * duration;
-    setPrice(isEmergency ? Math.round(base * EMERGENCY_MULTIPLIER) : base);
-  }, [serviceType, duration, isEmergency]);
 
   // when emergency is checked, force scheduledDate to today (no advance scheduling for emergencies)
   useEffect(() => {
@@ -42,51 +38,92 @@ function BookService() {
 
   const today = new Date().toISOString().split('T')[0];
 
+  // add/remove a service from the selected list when its checkbox is toggled
+  const toggleService = (service) => {
+    setSelectedServices((prev) =>
+      prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service]
+    );
+  };
+
+  // total price = sum of (hourly rate × duration [× emergency multiplier]) across all selected services
+  const totalPrice = selectedServices.reduce((sum, s) => {
+    const base = hourlyRates[s] * duration;
+    return sum + (isEmergency ? Math.round(base * EMERGENCY_MULTIPLIER) : base);
+  }, 0);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('Creating booking...');
-    setMatchInfo(null);
 
-    try {
-      const bookingData = {
-        customer: customer.id,
-        cooperative: cooperativeId,
-        serviceType,
-        isEmergency,
-        location: {
-          city: 'Delhi',
-          coordinates: { coordinates: [77.209, 28.6139] } // hardcoded for now
-        },
-        scheduledDate,
-        scheduledTime,
-        price
-      };
-
-      const created = await createBooking(bookingData);
-      setStatus('Booking created. Finding best worker...');
-
-      const assigned = await autoAssignBooking(created.booking._id);
-      setStatus('Worker matched successfully!');
-      setMatchInfo(assigned.matchDetails);
-
-      setTimeout(() => navigate('/customer/dashboard'), 2000);
-    } catch (err) {
-      setStatus('Something went wrong: ' + (err.response?.data?.message || err.message));
+    if (selectedServices.length === 0) {
+      setStatus('Please select at least one service.');
+      return;
     }
+
+    setStatus(`Creating ${selectedServices.length} booking(s)...`);
+    setResults([]);
+
+    const groupResults = [];
+
+    // loop through each selected service — create and auto-assign a separate booking for each,
+    // since each service needs its own worker, its own status, and its own rating later
+    for (const service of selectedServices) {
+      try {
+        const base = hourlyRates[service] * duration;
+        const price = isEmergency ? Math.round(base * EMERGENCY_MULTIPLIER) : base;
+
+        const bookingData = {
+          customer: customer.id,
+          cooperative: cooperativeId,
+          serviceType: service,
+          isEmergency,
+          location: {
+            city: 'Delhi',
+            coordinates: { coordinates: [77.209, 28.6139] } // hardcoded for now
+          },
+          scheduledDate,
+          scheduledTime,
+          price
+        };
+
+        const created = await createBooking(bookingData);
+        const assigned = await autoAssignBooking(created.booking._id);
+
+        groupResults.push({
+          service,
+          workerName: assigned.matchDetails.workerName,
+          distanceKm: assigned.matchDetails.distanceKm
+        });
+      } catch (err) {
+        // if one service fails to book/match, keep going with the rest and show the error for that one
+        groupResults.push({ service, error: err.response?.data?.message || 'Failed to book' });
+      }
+    }
+
+    setResults(groupResults);
+    setStatus('Done!');
+    setTimeout(() => navigate('/customer/dashboard'), 2500);
   };
 
   return (
     <div className="auth-page">
       <h2>Book a Service</h2>
+      <p className="muted" style={{ marginTop: '-8px' }}>Select one or more services — each gets matched to its own worker</p>
 
       <form onSubmit={handleSubmit}>
-        <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
-          <option value="cleaning">🧹 Cleaning</option>
-          <option value="plumbing">🔧 Plumbing</option>
-          <option value="electrical">⚡ Electrical</option>
-          <option value="elder care">👵 Elder Care</option>
-          <option value="gardening">🌱 Gardening</option>
-        </select>
+        {/* multi-select checklist replaces the old single dropdown */}
+        <div style={{ textAlign: 'left', marginBottom: '12px' }}>
+          {allServices.map((service) => (
+            <label key={service} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+              <input
+                type="checkbox"
+                checked={selectedServices.includes(service)}
+                onChange={() => toggleService(service)}
+                style={{ width: 'auto', margin: 0 }}
+              />
+              {getServiceIcon(service)} {service.charAt(0).toUpperCase() + service.slice(1)} — ₹{hourlyRates[service]}/hr
+            </label>
+          ))}
+        </div>
 
         <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
           <option value={1}>1 hour</option>
@@ -130,24 +167,33 @@ function BookService() {
         )}
 
         <div className="card" style={{ padding: '12px', marginBottom: '12px', textAlign: 'left' }}>
-          <strong>Price:</strong> ₹{price}{' '}
+          <strong>Total Estimated Price:</strong> ₹{totalPrice}
+          <br />
           <span className="muted" style={{ fontSize: '0.85em' }}>
-            (₹{hourlyRates[serviceType]}/hr × {duration}hr{isEmergency ? ' × 1.5 emergency surcharge' : ''} — cooperative rate card)
+            {selectedServices.length} service(s) × {duration}hr{isEmergency ? ' × 1.5 emergency surcharge' : ''} — cooperative rate card
           </span>
         </div>
 
         <button type="submit" className="primary">
-          {isEmergency ? '🚨 Request Emergency Service' : 'Book Now'}
+          {isEmergency ? '🚨 Request Emergency Services' : `Book ${selectedServices.length} Service(s)`}
         </button>
       </form>
 
       {status && <p style={{ marginTop: '15px' }}>{status}</p>}
 
-      {matchInfo && (
-        <div className="card" style={{ borderColor: '#8bc8ad' }}>
-          <p><strong>Matched Worker:</strong> {matchInfo.workerName}</p>
-          <p><strong>Distance:</strong> {matchInfo.distanceKm} km</p>
-          <p><strong>Match Score:</strong> {matchInfo.matchScore}</p>
+      {/* shows the outcome of each individual booking — who got matched, or the error if one failed */}
+      {results.length > 0 && (
+        <div className="card">
+          <h3>Booking Results</h3>
+          {results.map((r, i) => (
+            <div key={i} style={{ padding: '8px 0', borderBottom: i < results.length - 1 ? '1px solid #eee' : 'none' }}>
+              {r.error ? (
+                <p style={{ color: '#b44835' }}>{getServiceIcon(r.service)} {r.service}: {r.error}</p>
+              ) : (
+                <p>{getServiceIcon(r.service)} {r.service}: matched with <strong>{r.workerName}</strong> ({r.distanceKm} km away)</p>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
