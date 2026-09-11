@@ -3,6 +3,7 @@ import { getCustomerBookings } from '../../services/bookingService';
 import { useNavigate } from 'react-router-dom';
 import LogoutButton from '../../components/LogoutButton';
 import { getCustomerSubscriptions } from '../../services/subscriptionService';
+import { getServiceIcon } from '../../utils/serviceIcons';
 
 function CustomerDashboard() {
   const navigate = useNavigate();
@@ -30,40 +31,62 @@ function CustomerDashboard() {
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
 
   return (
-    <div style={{ maxWidth: '700px', margin: '30px auto', padding: '20px' }}>
-      <h2>Welcome, {customer?.name || customer?.organizationName || customer?.email}</h2>
-      <LogoutButton />
-      <button onClick={() => navigate('/customer/book')} style={{ padding: '10px', marginRight: '10px', marginBottom: '20px' }}>
-        Book a One-Time Service
-      </button>
-      <button onClick={() => navigate('/customer/contract')} style={{ padding: '10px', marginBottom: '20px' }}>
-        {customer?.type === 'institutional' ? 'Request Workforce Contract' : 'Subscribe to a Service'}
-      </button>
+    <div className="app-shell">
+      <div className="topbar">
+        <div className="brand">Welcome, {customer?.name || customer?.organizationName || customer?.email}</div>
+        <LogoutButton />
+      </div>
 
-      <p>Total Bookings: {bookings.length} &nbsp;|&nbsp; Total Subscriptions: {subscriptions.length}</p>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+        <button onClick={() => navigate('/customer/book')} className="primary" style={{ width: 'auto', flex: 1 }}>
+          Book a One-Time Service
+        </button>
+        <button onClick={() => navigate('/customer/contract')} className="outline" style={{ width: 'auto', flex: 1 }}>
+          {customer?.type === 'institutional' ? 'Request Workforce Contract' : 'Subscribe to a Service'}
+        </button>
+      </div>
 
-      <h3>Your Bookings</h3>
-      {bookings.length === 0 && <p>No bookings yet.</p>}
+      <div className="stats-row" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <div className="stat">
+          <b>{bookings.length}</b>
+          <small>Total Bookings</small>
+        </div>
+        <div className="stat">
+          <b>{subscriptions.length}</b>
+          <small>Total Subscriptions</small>
+        </div>
+      </div>
+
+      <h2>Your Bookings</h2>
+      {bookings.length === 0 && <p className="muted">No bookings yet.</p>}
       {bookings.map((booking) => (
-        <div key={booking._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', marginBottom: '10px' }}>
-          <p><strong>Service:</strong> {booking.serviceType}</p>
-          <p><strong>Status:</strong> {booking.status}</p>
-          <p><strong>Worker:</strong> {booking.worker ? booking.worker.name : 'Not assigned yet'}</p>
-          <p><strong>Scheduled:</strong> {new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime}</p>
-          <p><strong>Price:</strong> ₹{booking.price}</p>
+        <div key={booking._id} className="card list-item">
+          <div className="list-item-main">
+            <b>{getServiceIcon(booking.serviceType)} {booking.serviceType}</b>
+            <span>
+              Worker: {booking.worker ? booking.worker.name : 'Not assigned yet'} ·{' '}
+              {new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime} · ₹{booking.price}
+            </span>
+          </div>
+          <div className="list-item-side">
+            <span className={`badge ${booking.status === 'pending' ? 'pending' : 'assigned'}`}>{booking.status}</span>
+          </div>
         </div>
       ))}
 
-      <h3>Your Subscriptions / Contracts</h3>
-      {subscriptions.length === 0 && <p>No active contracts.</p>}
+      <h2>Your Subscriptions / Contracts</h2>
+      {subscriptions.length === 0 && <p className="muted">No active contracts.</p>}
       {subscriptions.map((sub) => (
-        <div key={sub._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', marginBottom: '10px' }}>
-          <p><strong>Service:</strong> {sub.serviceType}</p>
-          <p><strong>Type:</strong> {sub.contractType} — {sub.frequency}</p>
-          <p><strong>Workers Required:</strong> {sub.workersRequired}</p>
-          <p><strong>Status:</strong> {sub.status}</p>
-          <p><strong>Start:</strong> {new Date(sub.startDate).toLocaleDateString()}</p>
-          <p><strong>Monthly Cost:</strong> ₹{sub.price?.amount}</p>
+        <div key={sub._id} className="card list-item">
+          <div className="list-item-main">
+            <b>{getServiceIcon(sub.serviceType)} {sub.serviceType} — {sub.contractType} ({sub.frequency})</b>
+            <span>
+              Workers Required: {sub.workersRequired} · Start: {new Date(sub.startDate).toLocaleDateString()} · ₹{sub.price?.amount}/mo
+            </span>
+          </div>
+          <div className="list-item-side">
+            <span className={`badge ${sub.status === 'active' ? 'active' : 'pending'}`}>{sub.status}</span>
+          </div>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getWorkerBookings } from '../../services/bookingService';
 import LogoutButton from '../../components/LogoutButton';
+import { getServiceIcon } from '../../utils/serviceIcons';
 
 function WorkerDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -22,27 +23,36 @@ function WorkerDashboard() {
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
 
   return (
-    <div style={{ maxWidth: '700px', margin: '30px auto', padding: '20px' }}>
-      <h2>Welcome, {worker?.name}</h2>
-      <LogoutButton />
-      <p>Total Jobs: {bookings.length}</p>
+    <div className="app-shell">
+      <div className="topbar">
+        <div className="brand">Welcome, {worker?.name}</div>
+        <LogoutButton />
+      </div>
 
-      <h3>Your Jobs</h3>
-      {bookings.length === 0 && <p>No jobs assigned yet.</p>}
+      <div className="stats-row">
+        <div className="stat">
+          <b>{bookings.length}</b>
+          <small>Total Jobs</small>
+        </div>
+        <div className="stat">
+          <b>{bookings.filter(b => b.status === 'assigned').length}</b>
+          <small>Active Jobs</small>
+        </div>
+      </div>
+
+      <h2>Your Jobs</h2>
+      {bookings.length === 0 && <p className="muted">No jobs assigned yet.</p>}
       {bookings.map((booking) => (
-        <div
-          key={booking._id}
-          style={{
-            border: '1px solid #444',
-            borderRadius: '8px',
-            padding: '15px',
-            marginBottom: '10px'
-          }}
-        >
-          <p><strong>Service:</strong> {booking.serviceType}</p>
-          <p><strong>Status:</strong> {booking.status}</p>
-          <p><strong>Scheduled:</strong> {new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime}</p>
-          <p><strong>Price:</strong> ₹{booking.price}</p>
+        <div key={booking._id} className="card list-item">
+          <div className="list-item-main">
+            <b>{getServiceIcon(booking.serviceType)} {booking.serviceType}</b>
+            <span>
+              {new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime} · ₹{booking.price}
+            </span>
+          </div>
+          <div className="list-item-side">
+            <span className={`badge ${booking.status === 'pending' ? 'pending' : 'assigned'}`}>{booking.status}</span>
+          </div>
         </div>
       ))}
     </div>

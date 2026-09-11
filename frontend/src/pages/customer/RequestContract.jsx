@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { getServiceIcon } from '../../utils/serviceIcons';
 
 const bulkHourlyRates = {
   cleaning: 100,      // discounted vs 150 for individual
@@ -58,13 +59,12 @@ function RequestContract() {
   };
 
   return (
-    <div style={{ maxWidth: '450px', margin: '50px auto', padding: '20px' }}>
+    <div className="auth-page">
       <h2>Request Workforce Contract</h2>
-      <p style={{ color: '#888', fontSize: '0.9em' }}>Bulk institutional rates apply</p>
+      <p className="muted" style={{ marginTop: '-8px' }}>Bulk institutional rates apply</p>
 
       <form onSubmit={handleSubmit}>
-        <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}>
+        <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
           <option value="cleaning">Cleaning</option>
           <option value="plumbing">Plumbing</option>
           <option value="electrical">Electrical</option>
@@ -72,35 +72,31 @@ function RequestContract() {
           <option value="gardening">Gardening</option>
         </select>
 
-        <label style={{ display: 'block', marginBottom: '5px' }}>Workers Required</label>
-        <input type="number" min="1" value={workersRequired} onChange={(e) => setWorkersRequired(Number(e.target.value))} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        <label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>Workers Required</label>
+        <input type="number" min="1" value={workersRequired} onChange={(e) => setWorkersRequired(Number(e.target.value))} required />
 
-        <select value={frequency} onChange={(e) => setFrequency(e.target.value)}
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}>
+        <select value={frequency} onChange={(e) => setFrequency(e.target.value)}>
           <option value="weekly">Weekly</option>
           <option value="biweekly">Biweekly</option>
           <option value="monthly">Monthly</option>
           <option value="one-time-term">Fixed Term (e.g. 6 months)</option>
         </select>
 
-        <label style={{ display: 'block', marginBottom: '5px' }}>Start Date</label>
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        <label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>Start Date</label>
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
 
-        <label style={{ display: 'block', marginBottom: '5px' }}>End Date (optional)</label>
-        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        <label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>End Date (optional)</label>
+        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
 
-        <div style={{ padding: '10px', marginBottom: '10px', border: '1px solid #444', borderRadius: '6px' }}>
+        <div className="card" style={{ padding: '12px', marginBottom: '12px', textAlign: 'left' }}>
           <strong>Estimated Monthly Cost:</strong> ₹{monthlyEstimate}
           <br />
-          <span style={{ color: '#888', fontSize: '0.85em' }}>
+          <span className="muted" style={{ fontSize: '0.85em' }}>
             (₹{bulkHourlyRates[serviceType]}/hr bulk rate × {workersRequired} worker(s))
           </span>
         </div>
 
-        <button type="submit" style={{ width: '100%', padding: '10px' }}>Submit Request</button>
+        <button type="submit" className="primary">Submit Request</button>
       </form>
 
       {status && <p style={{ marginTop: '15px' }}>{status}</p>}

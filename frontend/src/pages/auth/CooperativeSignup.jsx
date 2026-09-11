@@ -38,30 +38,25 @@ function CooperativeSignup() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+    <div className="auth-page">
       <h2>Cooperative Sign Up</h2>
 
       <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Cooperative Name" value={name} onChange={(e) => setName(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        <input type="text" placeholder="Registration Number" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        <input type="email" placeholder="Admin Email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        <input type="text" placeholder="Contact Phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        <input type="text" placeholder="Cooperative Name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input type="text" placeholder="Registration Number" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} required />
+        <input type="email" placeholder="Admin Email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input type="text" placeholder="Contact Phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} required />
 
-        <button type="submit" style={{ width: '100%', padding: '10px' }}>Sign Up</button>
+        <button type="submit" className="primary">Sign Up</button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: '#4caf50' }}>{success}</p>}
+      {error && <p style={{ color: '#d65348', marginTop: '10px' }}>{error}</p>}
+      {success && <p style={{ color: '#177453', marginTop: '10px' }}>{success}</p>}
 
-      <p style={{ marginTop: '15px' }}>
+      <div className="link-row">
         Already have an account? <a href="/login">Login</a>
-      </p>
+      </div>
     </div>
   );
 }

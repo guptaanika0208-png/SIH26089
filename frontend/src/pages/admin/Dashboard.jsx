@@ -3,6 +3,7 @@ import { getCooperativeBookings } from '../../services/bookingService';
 import { getCooperativeWorkers } from '../../services/cooperativeService';
 import LogoutButton from '../../components/LogoutButton';
 import { getCooperativeSubscriptions } from '../../services/subscriptionService';
+import { getServiceIcon } from '../../utils/serviceIcons';
 
 function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -37,55 +38,71 @@ function AdminDashboard() {
   const pendingJobs = bookings.filter(b => b.status === 'pending').length;
 
   return (
-    <div style={{ maxWidth: '900px', margin: '30px auto', padding: '20px' }}>
-      <h2>{cooperative?.name} — Admin Dashboard</h2>
-      <LogoutButton />
+    <div className="app-shell">
+      <div className="topbar">
+        <div className="brand">{cooperative?.name} — Admin Dashboard</div>
+        <LogoutButton />
+      </div>
 
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
-        <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
-          <p>Total Workers</p>
-          <h3>{workers.length}</h3>
+      <div className="stats-row">
+        <div className="stat">
+          <b>{workers.length}</b>
+          <small>Total Workers</small>
         </div>
-        <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
-          <p>Active Jobs</p>
-          <h3>{activeContracts}</h3>
+        <div className="stat">
+          <b>{activeContracts}</b>
+          <small>Active Jobs</small>
         </div>
-        <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
-          <p>Pending Jobs</p>
-          <h3>{pendingJobs}</h3>
+        <div className="stat">
+          <b>{pendingJobs}</b>
+          <small>Pending Jobs</small>
         </div>
-        <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
-          <p>Total Bookings</p>
-          <h3>{bookings.length}</h3>
+        <div className="stat">
+          <b>{bookings.length}</b>
+          <small>Total Bookings</small>
         </div>
-        <div style={{ border: '1px solid #444', borderRadius: '8px', padding: '15px', flex: 1 }}>
-          <p>Active Contracts</p>
-          <h3>{subscriptions.filter(s => s.status === 'active').length}</h3>
+        <div className="stat">
+          <b>{subscriptions.filter(s => s.status === 'active').length}</b>
+          <small>Active Contracts</small>
         </div>
       </div>
 
-      <h3>Worker Roster</h3>
+      <h2>Worker Roster</h2>
       {workers.map((w) => (
-        <div key={w._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '10px', marginBottom: '8px' }}>
-          <p><strong>{w.name}</strong> — Skills: {w.skills.join(', ')} — Workload: {w.currentWorkload} — Status: {w.availability}</p>
+        <div key={w._id} className="card list-item">
+          <div className="list-item-main">
+            <b>{w.name}</b>
+            <span>Skills: {w.skills.join(', ')} · Workload: {w.currentWorkload}</span>
+          </div>
+          <div className="list-item-side">
+            <span className={`badge ${w.availability === 'available' ? 'active' : 'pending'}`}>{w.availability}</span>
+          </div>
         </div>
       ))}
 
-      <h3>All Bookings</h3>
+      <h2>All Bookings</h2>
       {bookings.map((b) => (
-        <div key={b._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '10px', marginBottom: '8px' }}>
-          <p><strong>Service:</strong> {b.serviceType} — <strong>Status:</strong> {b.status} — <strong>Worker:</strong> {b.worker ? b.worker.name : 'Unassigned'}</p>
+        <div key={b._id} className="card list-item">
+          <div className="list-item-main">
+            <strong>Service:</strong> {getServiceIcon(b.serviceType)} {b.serviceType}
+            <span>Worker: {b.worker ? b.worker.name : 'Unassigned'}</span>
+          </div>
+          <div className="list-item-side">
+            <span className={`badge ${b.status === 'pending' ? 'pending' : 'assigned'}`}>{b.status}</span>
+          </div>
         </div>
       ))}
 
-      <h3>Subscriptions / Contracts</h3>
+      <h2>Subscriptions / Contracts</h2>
       {subscriptions.map((s) => (
-        <div key={s._id} style={{ border: '1px solid #444', borderRadius: '8px', padding: '10px', marginBottom: '8px' }}>
-          <p>
-            <strong>{s.serviceType}</strong> — {s.contractType} ({s.frequency}) —
-            Customer: {s.customer?.name || s.customer?.organizationName} —
-            Workers Needed: {s.workersRequired} — Status: {s.status}
-          </p>
+        <div key={s._id} className="card list-item">
+          <div className="list-item-main">
+            <b>{s.serviceType} — {s.contractType} ({s.frequency})</b>
+            <span>Customer: {s.customer?.name || s.customer?.organizationName} · Workers Needed: {s.workersRequired}</span>
+          </div>
+          <div className="list-item-side">
+            <span className={`badge ${s.status === 'active' ? 'active' : 'pending'}`}>{s.status}</span>
+          </div>
         </div>
       ))}
     </div>

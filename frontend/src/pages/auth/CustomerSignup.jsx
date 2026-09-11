@@ -43,46 +43,38 @@ function CustomerSignup() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+    <div className="auth-page">
       <h2>Customer Sign Up</h2>
 
-      <select value={type} onChange={(e) => setType(e.target.value)}
-        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}>
+      <select value={type} onChange={(e) => setType(e.target.value)}>
         <option value="individual">Individual / Household</option>
         <option value="institutional">Institution (School, Hospital, Office, etc.)</option>
       </select>
 
       <form onSubmit={handleSubmit}>
         {type === 'individual' ? (
-          <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required
-            style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+          <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
         ) : (
           <>
-            <input type="text" placeholder="Organization Name" value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required
-              style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-            <input type="text" placeholder="Contact Person" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required
-              style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-            <input type="text" placeholder="Registration Number (GST/etc.)" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} required
-              style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+            <input type="text" placeholder="Organization Name" value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required />
+            <input type="text" placeholder="Contact Person" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required />
+            <input type="text" placeholder="Registration Number (GST/etc.)" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} required />
           </>
         )}
 
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        <input type="text" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input type="text" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
 
-        <button type="submit" style={{ width: '100%', padding: '10px' }}>Sign Up</button>
+        <button type="submit" className="primary">Sign Up</button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: '#4caf50' }}>{success}</p>}
+      {error && <p style={{ color: '#d65348', marginTop: '10px' }}>{error}</p>}
+      {success && <p style={{ color: '#177453', marginTop: '10px' }}>{success}</p>}
 
-      <p style={{ marginTop: '15px' }}>
+      <div className="link-row">
         Already have an account? <a href="/login">Login</a>
-      </p>
+      </div>
     </div>
   );
 }

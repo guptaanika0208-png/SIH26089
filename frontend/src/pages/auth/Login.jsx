@@ -30,10 +30,10 @@ function Login() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+    <div className="auth-page">
       <h2>Login</h2>
 
-      <select value={role} onChange={(e) => setRole(e.target.value)} style={{ marginBottom: '10px', width: '100%', padding: '8px' }}>
+      <select value={role} onChange={(e) => setRole(e.target.value)}>
         <option value="worker">Worker</option>
         <option value="customer">Customer</option>
         <option value="cooperative">Cooperative Admin</option>
@@ -46,7 +46,7 @@ function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+
         />
         <input
           type="password"
@@ -54,26 +54,24 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+          
         />
-        <button type="submit" style={{ width: '100%', padding: '10px' }}>
+        <button type="submit" className="primary">
           Login
         </button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: '#d65348', marginTop: '10px' }}>{error}</p>}
 
-      <p style={{ marginTop: '15px' }}>
+      <div className="link-row">
         New worker? <a href="/signup/worker">Sign up here</a>
-      </p>
-
-      <p style={{ marginTop: '15px' }}>
+      </div>
+      <div className="link-row">
         New customer? <a href="/signup/customer">Sign up here</a>
-      </p>
-
-      <p style={{ marginTop: '15px' }}>
+      </div>
+      <div className="link-row">
         New cooperative? <a href="/signup/cooperative">Sign up here</a>
-      </p>
+      </div>
     </div>
   );
 }

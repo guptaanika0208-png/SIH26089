@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking, autoAssignBooking } from '../../services/bookingService';
+import { getServiceIcon } from '../../utils/serviceIcons';
 
 const hourlyRates = {
   cleaning: 150,
@@ -62,15 +63,11 @@ function BookService() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+    <div className="auth-page">
       <h2>Book a Service</h2>
 
       <form onSubmit={handleSubmit}>
-        <select
-          value={serviceType}
-          onChange={(e) => setServiceType(e.target.value)}
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-        >
+        <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
           <option value="cleaning">Cleaning</option>
           <option value="plumbing">Plumbing</option>
           <option value="electrical">Electrical</option>
@@ -78,11 +75,7 @@ function BookService() {
           <option value="gardening">Gardening</option>
         </select>
 
-        <select
-          value={duration}
-          onChange={(e) => setDuration(Number(e.target.value))}
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-        >
+        <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
           <option value={1}>1 hour</option>
           <option value={2}>2 hours</option>
           <option value={3}>3 hours</option>
@@ -94,7 +87,7 @@ function BookService() {
           value={scheduledDate}
           onChange={(e) => setScheduledDate(e.target.value)}
           required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+          
         />
 
         <input
@@ -103,17 +96,17 @@ function BookService() {
           value={scheduledTime}
           onChange={(e) => setScheduledTime(e.target.value)}
           required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+
         />
 
-        <div style={{ padding: '10px', marginBottom: '10px', border: '1px solid #444', borderRadius: '6px' }}>
+        <div className="card" style={{ padding: '12px', marginBottom: '12px' }}>
           <strong>Price:</strong> ₹{price}{' '}
-          <span style={{ color: '#888', fontSize: '0.85em' }}>
+          <span className="muted" style={{ fontSize: '0.85em' }}>
             (₹{hourlyRates[serviceType]}/hr × {duration}hr — cooperative rate card)
           </span>
         </div>
 
-        <button type="submit" style={{ width: '100%', padding: '10px' }}>
+        <button type="submit" className="primary">
           Book Now
         </button>
       </form>
@@ -121,7 +114,7 @@ function BookService() {
       {status && <p style={{ marginTop: '15px' }}>{status}</p>}
 
       {matchInfo && (
-        <div style={{ border: '1px solid #4caf50', borderRadius: '8px', padding: '10px', marginTop: '10px' }}>
+        <div className="card" style={{ borderColor: '#8bc8ad' }}>
           <p><strong>Matched Worker:</strong> {matchInfo.workerName}</p>
           <p><strong>Distance:</strong> {matchInfo.distanceKm} km</p>
           <p><strong>Match Score:</strong> {matchInfo.matchScore}</p>
