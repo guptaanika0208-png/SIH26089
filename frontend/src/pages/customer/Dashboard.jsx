@@ -100,6 +100,12 @@ function CustomerDashboard() {
                 </button>
               </div>
             )}
+
+            {booking.status === 'completed' && booking.earningsBreakdown && (
+              <span className="muted" style={{ fontSize: '0.85em' }}>
+                You paid ₹{booking.price} → Worker received ₹{booking.earningsBreakdown.workerEarning} · Platform fee ₹{booking.earningsBreakdown.platformFee}
+              </span>
+            )}
             {booking.rating?.score != null && (
               <span className="muted">Your rating: {'⭐'.repeat(booking.rating.score)}</span>
             )}

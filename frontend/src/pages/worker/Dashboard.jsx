@@ -81,6 +81,11 @@ function WorkerDashboard() {
                 Mark Complete
               </button>
             )}
+            {booking.status === 'completed' && booking.earningsBreakdown && (
+              <span className="muted" style={{ fontSize: '0.85em' }}>
+                You earned ₹{booking.earningsBreakdown.workerEarning} from this ₹{booking.price} job (platform fee: ₹{booking.earningsBreakdown.platformFee})
+              </span>
+            )}
           </div>
         </div>
       ))}
