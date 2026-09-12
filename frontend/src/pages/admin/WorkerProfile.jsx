@@ -82,6 +82,7 @@ function WorkerProfile() {
         <p><strong>Phone:</strong> {worker.phone}</p>
         <p><strong>Email:</strong> {worker.email}</p>
         <p><strong>Location:</strong> {worker.location?.city}</p>
+        <p><strong>Cooperative:</strong> {worker.cooperative?.name || 'N/A'}</p>
       </div>
 
       <h2>Certifications</h2>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking, autoAssignBooking } from '../../services/bookingService';
 import { getServiceIcon } from '../../utils/serviceIcons';
+import { getCurrentLocation } from '../../utils/geolocation';
 
 const hourlyRates = {
   cleaning: 150,
@@ -15,20 +16,20 @@ const EMERGENCY_MULTIPLIER = 1.5;
 const allServices = Object.keys(hourlyRates);
 
 function BookService() {
-  // customer can now select multiple services in one go — each becomes its own booking
   const [selectedServices, setSelectedServices] = useState(['cleaning']);
   const [duration, setDuration] = useState(1);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
   const [isEmergency, setIsEmergency] = useState(false);
   const [status, setStatus] = useState('');
-  const [results, setResults] = useState([]); // holds per-service booking/match results after submit
+  const [results, setResults] = useState([]);
   const navigate = useNavigate();
+  const [coordinates, setCoordinates] = useState([77.209, 28.6139]); // fallback default
+  const [locationStatus, setLocationStatus] = useState('');
 
   const customer = JSON.parse(localStorage.getItem('user'));
-  const cooperativeId = '6aa1027310b84da7531d606c'; // hardcoded — only one cooperative exists right now
+  const cooperativeId = '6aa1027310b84da7531d606c';
 
-  // when emergency is checked, force scheduledDate to today (no advance scheduling for emergencies)
   useEffect(() => {
     if (isEmergency) {
       const today = new Date().toISOString().split('T')[0];
@@ -38,18 +39,28 @@ function BookService() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  // add/remove a service from the selected list when its checkbox is toggled
   const toggleService = (service) => {
     setSelectedServices((prev) =>
       prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service]
     );
   };
 
-  // total price = sum of (hourly rate × duration [× emergency multiplier]) across all selected services
   const totalPrice = selectedServices.reduce((sum, s) => {
     const base = hourlyRates[s] * duration;
     return sum + (isEmergency ? Math.round(base * EMERGENCY_MULTIPLIER) : base);
   }, 0);
+
+  // separate, standalone function — was accidentally nested inside handleSubmit before
+  const handleUseLocation = async () => {
+    setLocationStatus('Getting your location...');
+    try {
+      const { latitude, longitude } = await getCurrentLocation();
+      setCoordinates([longitude, latitude]); // MongoDB expects [lng, lat] order
+      setLocationStatus('✓ Location captured');
+    } catch (err) {
+      setLocationStatus('Could not get location — using default (Delhi)');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,8 +75,6 @@ function BookService() {
 
     const groupResults = [];
 
-    // loop through each selected service — create and auto-assign a separate booking for each,
-    // since each service needs its own worker, its own status, and its own rating later
     for (const service of selectedServices) {
       try {
         const base = hourlyRates[service] * duration;
@@ -78,7 +87,7 @@ function BookService() {
           isEmergency,
           location: {
             city: 'Delhi',
-            coordinates: { coordinates: [77.209, 28.6139] } // hardcoded for now
+            coordinates: { coordinates }
           },
           scheduledDate,
           scheduledTime,
@@ -94,7 +103,6 @@ function BookService() {
           distanceKm: assigned.matchDetails.distanceKm
         });
       } catch (err) {
-        // if one service fails to book/match, keep going with the rest and show the error for that one
         groupResults.push({ service, error: err.response?.data?.message || 'Failed to book' });
       }
     }
@@ -110,7 +118,6 @@ function BookService() {
       <p className="muted" style={{ marginTop: '-8px' }}>Select one or more services — each gets matched to its own worker</p>
 
       <form onSubmit={handleSubmit}>
-        {/* multi-select checklist replaces the old single dropdown */}
         <div style={{ textAlign: 'left', marginBottom: '12px' }}>
           {allServices.map((service) => (
             <label key={service} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
@@ -131,6 +138,23 @@ function BookService() {
           <option value={3}>3 hours</option>
           <option value={4}>4 hours</option>
         </select>
+
+        <button type="button" className="outline" style={{ marginBottom: '10px' }} onClick={handleUseLocation}>
+          📍 Use My Current Location
+        </button>
+        {locationStatus && <p className="muted" style={{ fontSize: '0.85em', marginTop: '-6px', marginBottom: '10px' }}>{locationStatus}</p>}
+
+        {locationStatus.includes('captured') && (
+          <div style={{ height: '200px', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px', border: '1px solid #dce7e2' }}>
+            <iframe
+              title="Location Map"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              src={`https://www.google.com/maps?q=${coordinates[1]},${coordinates[0]}&output=embed`}
+            />
+          </div>
+        )}
 
         <input
           type="date"
@@ -181,7 +205,6 @@ function BookService() {
 
       {status && <p style={{ marginTop: '15px' }}>{status}</p>}
 
-      {/* shows the outcome of each individual booking — who got matched, or the error if one failed */}
       {results.length > 0 && (
         <div className="card">
           <h3>Booking Results</h3>

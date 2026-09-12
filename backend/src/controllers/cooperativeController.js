@@ -84,7 +84,7 @@ const getCooperativeWorkers = async (req, res) => {
 const getWorkerById = async (req, res) => {
   try {
     const { workerId } = req.params;
-    const worker = await Worker.findById(workerId);
+    const worker = await Worker.findById(workerId).populate('cooperative', 'name');
     if (!worker) return res.status(404).json({ message: 'Worker not found' });
     res.status(200).json({ worker });
   } catch (error) {
