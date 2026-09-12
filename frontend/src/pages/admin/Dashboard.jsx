@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getCooperativeBookings } from '../../services/bookingService';
 import { getCooperativeWorkers } from '../../services/cooperativeService';
 import LogoutButton from '../../components/LogoutButton';
-import { getCooperativeSubscriptions } from '../../services/subscriptionService';
 import { getDemandStats } from '../../services/bookingService';
 import { getServiceIcon } from '../../utils/serviceIcons';
+import { getCooperativeSubscriptions, updateSubscriptionStatus, assignWorkerToSubscription } from '../../services/subscriptionService';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -37,6 +37,27 @@ function AdminDashboard() {
         .finally(() => setLoading(false));
     }
   }, []);
+
+  const handleSubscriptionStatusChange = async (subscriptionId, newStatus) => {
+    try {
+      await updateSubscriptionStatus(subscriptionId, newStatus);
+      const updated = await getCooperativeSubscriptions(cooperative.id);
+      setSubscriptions(updated.subscriptions);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAssignWorkerToSub = async (subscriptionId, workerId) => {
+    if (!workerId) return;
+    try {
+      await assignWorkerToSubscription(subscriptionId, workerId);
+      const updated = await getCooperativeSubscriptions(cooperative.id);
+      setSubscriptions(updated.subscriptions);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
 
@@ -133,17 +154,48 @@ function AdminDashboard() {
       ))}
 
       <h2>Subscriptions / Contracts</h2>
-      {subscriptions.map((s) => (
-        <div key={s._id} className="card list-item">
-          <div className="list-item-main">
-            <b>{s.serviceType} — {s.contractType} ({s.frequency})</b>
-            <span>Customer: {s.customer?.name || s.customer?.organizationName} · Workers Needed: {s.workersRequired}</span>
+      {subscriptions.map((s) => {
+        const activeAssignment = s.assignedWorkers?.find((a) => a.isActive);
+        // only workers with the matching skill make sense to assign
+        const eligibleWorkers = workers.filter((w) => w.skills.includes(s.serviceType));
+
+        return (
+          <div key={s._id} className="card list-item">
+            <div className="list-item-main">
+              <b>{s.serviceType} — {s.contractType} ({s.frequency})</b>
+              <span>Customer: {s.customer?.name || s.customer?.organizationName} · Workers Needed: {s.workersRequired}</span>
+              <span className="muted" style={{ fontSize: '0.85em' }}>
+                Assigned worker: {activeAssignment ? activeAssignment.worker?.name : 'Unassigned'}
+              </span>
+            </div>
+            <div className="list-item-side">
+              <span className={`badge ${s.status === 'active' ? 'active' : 'pending'}`}>{s.status}</span>
+              <select
+                value={s.status}
+                onChange={(e) => handleSubscriptionStatusChange(s._id, e.target.value)}
+                style={{ width: 'auto', padding: '6px' }}
+              >
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select
+                defaultValue=""
+                onChange={(e) => handleAssignWorkerToSub(s._id, e.target.value)}
+                style={{ width: 'auto', padding: '6px' }}
+              >
+                <option value="" disabled>
+                  {activeAssignment ? 'Replace worker...' : 'Assign worker...'}
+                </option>
+                {eligibleWorkers.map((w) => (
+                  <option key={w._id} value={w._id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="list-item-side">
-            <span className={`badge ${s.status === 'active' ? 'active' : 'pending'}`}>{s.status}</span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

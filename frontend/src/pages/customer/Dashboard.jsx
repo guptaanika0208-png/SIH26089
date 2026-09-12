@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoutButton from '../../components/LogoutButton';
-import { getCustomerSubscriptions } from '../../services/subscriptionService';
 import { getServiceIcon } from '../../utils/serviceIcons';
 import { getCustomerBookings, rateBooking } from '../../services/bookingService';
 import PaymentModal from '../../components/PaymentModal';
+import { getCustomerSubscriptions, updateSubscriptionStatus } from '../../services/subscriptionService';
 
 function CustomerDashboard() {
   const navigate = useNavigate();
@@ -43,6 +43,16 @@ function CustomerDashboard() {
       await rateBooking(bookingId, Number(score));
       const updated = await getCustomerBookings(customer.id);
       setBookings(updated.bookings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCancelSubscription = async (subscriptionId) => {
+    try {
+      await updateSubscriptionStatus(subscriptionId, 'cancelled');
+      const updated = await getCustomerSubscriptions(customer.id);
+      setSubscriptions(updated.subscriptions);
     } catch (err) {
       console.error(err);
     }
@@ -149,6 +159,11 @@ function CustomerDashboard() {
           </div>
           <div className="list-item-side">
             <span className={`badge ${sub.status === 'active' ? 'active' : 'pending'}`}>{sub.status}</span>
+            {sub.status === 'active' && (
+              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleCancelSubscription(sub._id)}>
+                Cancel
+              </button>
+            )}
           </div>
         </div>
       ))}
