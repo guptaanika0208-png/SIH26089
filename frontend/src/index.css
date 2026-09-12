@@ -12,7 +12,7 @@ body {
 button, input, select { font: inherit; }
 button { cursor: pointer; border: 0; }
 
-.app-shell {
+/* .app-shell {
   width: 100%;
   max-width: 480px;
   min-height: 100vh;
@@ -35,6 +35,33 @@ button { cursor: pointer; border: 0; }
     border-radius: 28px;
     overflow: hidden;
     box-shadow: 0 0 60px rgba(0,0,0,0.08);
+  }
+} */
+
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: auto;
+  background: #f7f8fa;
+  padding: 0 0 110px;
+  overflow-x: hidden;
+}
+
+@media (min-width: 700px) {
+  body {
+    background: #dfe3ea;
+  }
+  .app-shell {
+    max-width: 720px;
+    margin: 20px auto;
+    min-height: calc(100vh - 40px);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,0,0,0.08);
+  }
+  .stats-row {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
