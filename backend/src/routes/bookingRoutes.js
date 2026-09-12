@@ -8,7 +8,8 @@ const { createBooking,
     getCooperativeBookings, 
     completeBooking, 
     rateBooking,
-    getDemandStats} = require('../controllers/bookingController');
+    getDemandStats,
+    payBooking} = require('../controllers/bookingController');
 
 router.post('/create', createBooking);
 router.patch('/:bookingId/assign', assignWorker);
@@ -19,5 +20,6 @@ router.get('/cooperative/:cooperativeId', getCooperativeBookings);
 router.patch('/:bookingId/complete', completeBooking);
 router.patch('/:bookingId/rate', rateBooking);
 router.get('/demand/:cooperativeId', getDemandStats);
+router.patch('/:bookingId/pay', payBooking);
 
 module.exports = router;

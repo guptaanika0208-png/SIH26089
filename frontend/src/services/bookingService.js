@@ -39,3 +39,8 @@ export const getDemandStats = async (cooperativeId) => {
   const response = await api.get(`/bookings/demand/${cooperativeId}`);
   return response.data;
 };
+
+export const payBooking = async (bookingId) => {
+  const response = await api.patch(`/bookings/${bookingId}/pay`);
+  return response.data;
+};

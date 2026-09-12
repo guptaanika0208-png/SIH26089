@@ -4,6 +4,7 @@ import LogoutButton from '../../components/LogoutButton';
 import { getCustomerSubscriptions } from '../../services/subscriptionService';
 import { getServiceIcon } from '../../utils/serviceIcons';
 import { getCustomerBookings, rateBooking } from '../../services/bookingService';
+import PaymentModal from '../../components/PaymentModal';
 
 function CustomerDashboard() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ function CustomerDashboard() {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [payingBooking, setPayingBooking] = useState(null);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -44,6 +46,11 @@ function CustomerDashboard() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const refreshBookings = async () => {
+    const updated = await getCustomerBookings(customer.id);
+    setBookings(updated.bookings);
   };
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
@@ -117,6 +124,15 @@ function CustomerDashboard() {
             <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
               {booking.status}
             </span>
+
+            {booking.status === 'completed' && booking.paymentStatus !== 'paid' && (
+              <button className="primary" style={{ width: 'auto', padding: '8px 14px' }} onClick={() => setPayingBooking(booking)}>
+                Pay Now
+              </button>
+            )}
+            {booking.paymentStatus === 'paid' && (
+              <span className="badge active">✓ Paid</span>
+            )}
           </div>
         </div>
       ))}
@@ -136,6 +152,14 @@ function CustomerDashboard() {
           </div>
         </div>
       ))}
+
+      {payingBooking && (
+        <PaymentModal
+          booking={payingBooking}
+          onClose={() => setPayingBooking(null)}
+          onSuccess={refreshBookings}
+        />
+      )}
     </div>
   );
 }

@@ -243,6 +243,21 @@ const getDemandStats = async (req, res) => {
   }
 };
 
+const payBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    booking.paymentStatus = 'paid';
+    await booking.save();
+
+    res.status(200).json({ message: 'Payment recorded successfully', booking });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   assignWorker,
@@ -252,5 +267,6 @@ module.exports = {
   getCooperativeBookings,
   completeBooking,
   rateBooking,
-  getDemandStats
+  getDemandStats,
+  payBooking
 };

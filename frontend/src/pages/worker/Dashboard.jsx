@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import LogoutButton from '../../components/LogoutButton';
 import { getServiceIcon } from '../../utils/serviceIcons';
-import { getWorkerBookings, completeBooking } from '../../services/bookingService';
+import { getWorkerBookings, completeBooking, payBooking } from '../../services/bookingService';
 import { useNavigate } from 'react-router-dom';
 
 function WorkerDashboard() {
@@ -22,6 +22,16 @@ function WorkerDashboard() {
     }
   }, []);
 
+  const handleConfirmCash = async (bookingId) => {
+    try {
+      await payBooking(bookingId);
+      const updated = await getWorkerBookings(worker.id);
+      setBookings(updated.bookings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleComplete = async (bookingId) => {
     try {
       await completeBooking(bookingId);
@@ -31,7 +41,6 @@ function WorkerDashboard() {
       console.error(err);
     }
   };
-  
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p>;
 
@@ -81,6 +90,15 @@ function WorkerDashboard() {
                 Mark Complete
               </button>
             )}
+            {booking.status === 'completed' && booking.paymentStatus !== 'paid' && (
+              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleConfirmCash(booking._id)}>
+                💵 Confirm Cash Received
+              </button>
+            )}
+            {booking.paymentStatus === 'paid' && (
+              <span className="badge active">✓ Paid</span>
+            )}
+
             {booking.status === 'completed' && booking.earningsBreakdown && (
               <span className="muted" style={{ fontSize: '0.85em' }}>
                 You earned ₹{booking.earningsBreakdown.workerEarning} from this ₹{booking.price} job (platform fee: ₹{booking.earningsBreakdown.platformFee})

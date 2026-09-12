@@ -127,6 +127,7 @@ function AdminDashboard() {
               <span className="badge" style={{ background: '#fff0eb', color: '#b44835' }}>🚨 Urgent</span>
             )}
             <span className={`badge ${b.status === 'pending' ? 'pending' : 'assigned'}`}>{b.status}</span>
+            <span className={`badge ${b.paymentStatus === 'paid' ? 'active' : 'pending'}`}>{b.paymentStatus}</span>
           </div>
         </div>
       ))}
