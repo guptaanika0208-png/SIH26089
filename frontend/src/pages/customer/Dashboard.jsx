@@ -68,7 +68,10 @@ function CustomerDashboard() {
   return (
     <div className="app-shell">
       <div className="topbar">
-        <div className="brand">Welcome, {customer?.name || customer?.organizationName || customer?.email}</div>
+        <div>
+          <div className="brand">GharGo</div>
+          <div className="muted" style={{ fontSize: '13px' }}>Welcome, {customer?.name || customer?.organizationName || customer?.email}</div>
+        </div>
         <LogoutButton />
       </div>
 

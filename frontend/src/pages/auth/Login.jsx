@@ -31,6 +31,7 @@ function Login() {
 
   return (
     <div className="auth-page">
+      <div className="brand" style={{ textAlign: 'center', marginBottom: '15px' }}>GharGo</div>
       <h2>Login</h2>
 
       <select value={role} onChange={(e) => setRole(e.target.value)}>

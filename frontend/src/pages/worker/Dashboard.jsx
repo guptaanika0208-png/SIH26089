@@ -47,7 +47,10 @@ function WorkerDashboard() {
   return (
     <div className="app-shell">
       <div className="topbar">
-        <div className="brand">Welcome, {worker?.name}</div>
+        <div>
+          <div className="brand">GharGo</div>
+          <div className="muted" style={{ fontSize: '13px' }}>Welcome, {worker?.name}</div>
+        </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="outline" style={{ width: 'auto', padding: '8px 14px' }} onClick={() => navigate(`/cooperative/worker/${worker.id}`)}>
             View My Profile

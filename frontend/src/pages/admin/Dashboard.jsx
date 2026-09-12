@@ -67,7 +67,10 @@ function AdminDashboard() {
   return (
     <div className="app-shell">
       <div className="topbar">
-        <div className="brand">{cooperative?.name} — Admin Dashboard</div>
+        <div>
+          <div className="brand">GharGo</div>
+          <div className="muted" style={{ fontSize: '13px' }}>{cooperative?.name} — Admin Dashboard</div>
+        </div>
         <LogoutButton />
       </div>
 
