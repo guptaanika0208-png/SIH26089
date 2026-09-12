@@ -3,6 +3,7 @@ import LogoutButton from '../../components/LogoutButton';
 import { getServiceIcon } from '../../utils/serviceIcons';
 import { getWorkerBookings, completeBooking, payBooking } from '../../services/bookingService';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from '../../components/BottomNav';
 
 function WorkerDashboard() {
   const navigate = useNavigate();
@@ -110,6 +111,12 @@ function WorkerDashboard() {
           </div>
         </div>
       ))}
+
+      <BottomNav items={[
+        { path: '/worker/dashboard', icon: '💼', label: 'Jobs' },
+        { path: `/cooperative/worker/${worker?.id}`, icon: '👤', label: 'Profile' },
+      ]} />
+
     </div>
   );
 }

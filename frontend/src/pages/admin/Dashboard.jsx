@@ -6,6 +6,7 @@ import LogoutButton from '../../components/LogoutButton';
 import { getDemandStats } from '../../services/bookingService';
 import { getServiceIcon } from '../../utils/serviceIcons';
 import { getCooperativeSubscriptions, updateSubscriptionStatus, assignWorkerToSubscription } from '../../services/subscriptionService';
+import BottomNav from '../../components/BottomNav';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -98,7 +99,9 @@ function AdminDashboard() {
       </div>
 
       <h2>Worker Roster</h2>
-      <p className="muted" style={{ marginTop: '-8px', fontSize: '0.85em' }}>Click a worker to view their full profile</p>
+      <p className="muted" style={{ marginTop: '-8px', marginLeft: '20px', marginRight: '20px', fontSize: '0.85em' }}>
+        Click a worker to view their full profile
+      </p>
       {workers.map((w) => (
         <div
           key={w._id}
@@ -199,6 +202,11 @@ function AdminDashboard() {
           </div>
         );
       })}
+
+      <BottomNav items={[
+        { path: '/cooperative/dashboard', label: 'Dashboard' },
+      ]} />
+
     </div>
   );
 }

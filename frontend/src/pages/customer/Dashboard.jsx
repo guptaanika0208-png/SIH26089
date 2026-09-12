@@ -5,6 +5,7 @@ import { getServiceIcon } from '../../utils/serviceIcons';
 import { getCustomerBookings, rateBooking } from '../../services/bookingService';
 import PaymentModal from '../../components/PaymentModal';
 import { getCustomerSubscriptions, updateSubscriptionStatus } from '../../services/subscriptionService';
+import BottomNav from '../../components/BottomNav';
 
 function CustomerDashboard() {
   const navigate = useNavigate();
@@ -178,6 +179,13 @@ function CustomerDashboard() {
           onSuccess={refreshBookings}
         />
       )}
+
+      <BottomNav items={[
+        { path: '/customer/dashboard', icon: '🏠', label: 'Home' },
+        { path: '/customer/book', icon: '🧰', label: 'Book' },
+        { path: '/customer/contract', icon: '📋', label: 'Contracts' },
+      ]} />
+
     </div>
   );
 }

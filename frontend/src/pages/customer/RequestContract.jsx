@@ -60,6 +60,15 @@ function RequestContract() {
 
   return (
     <div className="auth-page">
+      {/* back button so users on mobile aren't stuck relying on the browser's own back gesture */}
+      <button
+        className="outline"
+        style={{ width: 'auto', padding: '8px 14px', marginBottom: '15px' }}
+        onClick={() => navigate('/customer/dashboard')}
+      >
+        ← Back
+      </button>
+
       <h2>Request Workforce Contract</h2>
       <p className="muted" style={{ marginTop: '-8px' }}>Bulk institutional rates apply</p>
 

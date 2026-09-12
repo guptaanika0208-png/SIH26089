@@ -33,13 +33,18 @@ function WorkerProfile() {
 
   return (
     <div className="app-shell">
-      <button className="outline" style={{ width: 'auto', padding: '8px 14px', marginBottom: '15px' }} onClick={() => navigate(-1)}>
-        ← Back
-      </button>
-
-      <div className="topbar">
-        <div className="brand">{worker.name}</div>
-        <span className={`badge ${worker.availability === 'available' ? 'active' : 'pending'}`}>{worker.availability}</span>
+      <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
+        <button
+          className="outline"
+          style={{ width: 'auto', padding: '6px 12px', background: 'transparent', border: '1.5px solid #ffffff55', color: '#fff' }}
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+          <div className="brand">{worker.name}</div>
+          <span className={`badge ${worker.availability === 'available' ? 'active' : 'pending'}`}>{worker.availability}</span>
+        </div>
       </div>
 
       <div className="stats-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
