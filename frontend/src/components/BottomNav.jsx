@@ -6,10 +6,19 @@ function BottomNav({ items }) {
 
   return (
     <nav style={{
-      position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-      width: '100%', maxWidth: '480px', background: '#fff',
-      borderTop: '1px solid #eceff3', display: 'flex', justifyContent: 'space-around',
-      padding: '10px 0', zIndex: 10
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      margin: '0 auto',
+      width: 'min(100%, 720px)',
+      background: '#fff',
+      borderTop: '1px solid #eceff3',
+      display: 'flex',
+      justifyContent: 'space-around',
+      padding: '12px 0',
+      zIndex: 10,
+      boxSizing: 'border-box'
     }}>
       {items.map((item) => {
         const active = location.pathname === item.path;
@@ -23,7 +32,7 @@ function BottomNav({ items }) {
               fontSize: '11px', fontWeight: active ? 800 : 600
             }}
           >
-            <span style={{ fontSize: '18px' }}>{item.icon}</span>
+            <span style={{ fontSize: '20px', lineHeight: 1, display: 'block' }}>{item.icon}</span>
             {item.label}
           </button>
         );

@@ -48,61 +48,52 @@ function WorkerDashboard() {
   return (
     <div className="app-shell">
       <div className="topbar">
-        <div>
-          <div className="brand">GharGo</div>
-          <div className="muted" style={{ fontSize: '13px' }}>Welcome, {worker?.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="avatar" style={{ background: '#ffffff22', color: '#fff' }}>{worker?.name?.[0]}</div>
+          <div>
+            <div className="brand">GharGo</div>
+            <div className="muted" style={{ fontSize: '13px' }}>Welcome, {worker?.name}</div>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="outline" style={{ width: 'auto', padding: '8px 14px' }} onClick={() => navigate(`/cooperative/worker/${worker.id}`)}>
-            View My Profile
+            My Profile
           </button>
           <LogoutButton />
         </div>
       </div>
 
-      <div className="stats-row">
-        <div className="stat">
-          <b>{bookings.length}</b>
-          <small>Total Jobs</small>
-        </div>
-        <div className="stat">
-          <b>{bookings.filter(b => b.status === 'assigned').length}</b>
-          <small>Active Jobs</small>
-        </div>
-        <div className="stat">
-          <b>{worker?.rating?.average ? worker.rating.average.toFixed(1) : 'N/A'} ⭐</b>
-          <small>Rating ({worker?.rating?.count || 0} reviews)</small>
-        </div>
+      <div style={{ padding: '14px 20px 0' }}>
+        <span className="chip">✓ Verified Artisan</span>
+        <span className="chip">Fair Pay Guarantee</span>
       </div>
 
-      <h2>Your Jobs</h2>
-      {bookings.length === 0 && <p className="muted">No jobs assigned yet.</p>}
+      <div className="stats-row" style={{ marginTop: '14px' }}>
+        <div className="stat"><b>{bookings.length}</b><small>Total Jobs</small></div>
+        <div className="stat"><b>{bookings.filter(b => b.status === 'assigned').length}</b><small>Active Jobs</small></div>
+        <div className="stat"><b>{worker?.rating?.average ? worker.rating.average.toFixed(1) : 'N/A'} ⭐</b><small>Rating ({worker?.rating?.count || 0})</small></div>
+      </div>
+
+      <h2>Your jobs</h2>
+      <p className="muted" style={{ marginTop: '-15px', marginLeft: '20px', marginRight: '20px', fontSize: '0.85em' }}>
+        Assigned by your cooperative's fair allocation system
+      </p>
+      {bookings.length === 0 && <p className="muted" style={{ marginLeft: '20px' }}>No jobs assigned yet.</p>}
       {bookings.map((booking) => (
         <div key={booking._id} className="card list-item">
           <div className="list-item-main">
             <b>{getServiceIcon(booking.serviceType)} {booking.serviceType}</b>
-            <span>
-              {new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime} · ₹{booking.price}
-            </span>
+            <span>{new Date(booking.scheduledDate).toLocaleDateString()} at {booking.scheduledTime} · ₹{booking.price}</span>
           </div>
           <div className="list-item-side">
-            <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>
-              {booking.status}
-            </span>
+            <span className={`badge ${booking.status === 'pending' ? 'pending' : booking.status === 'completed' ? 'active' : 'assigned'}`}>{booking.status}</span>
             {booking.status === 'assigned' && (
-              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleComplete(booking._id)}>
-                Mark Complete
-              </button>
+              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleComplete(booking._id)}>Mark Complete</button>
             )}
             {booking.status === 'completed' && booking.paymentStatus !== 'paid' && (
-              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleConfirmCash(booking._id)}>
-                💵 Confirm Cash Received
-              </button>
+              <button className="outline" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => handleConfirmCash(booking._id)}>💵 Confirm Cash Received</button>
             )}
-            {booking.paymentStatus === 'paid' && (
-              <span className="badge active">✓ Paid</span>
-            )}
-
+            {booking.paymentStatus === 'paid' && <span className="badge active">✓ Paid</span>}
             {booking.status === 'completed' && booking.earningsBreakdown && (
               <span className="muted" style={{ fontSize: '0.85em' }}>
                 You earned ₹{booking.earningsBreakdown.workerEarning} from this ₹{booking.price} job (platform fee: ₹{booking.earningsBreakdown.platformFee})
@@ -116,7 +107,6 @@ function WorkerDashboard() {
         { path: '/worker/dashboard', icon: '💼', label: 'Jobs' },
         { path: `/cooperative/worker/${worker?.id}`, icon: '👤', label: 'Profile' },
       ]} />
-
     </div>
   );
 }

@@ -42,12 +42,20 @@ function WorkerProfile() {
           ← Back
         </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-          <div className="brand">{worker.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="avatar" style={{ background: '#ffffff22', color: '#fff' }}>{worker.name[0]}</div>
+            <div className="brand">{worker.name}</div>
+          </div>
           <span className={`badge ${worker.availability === 'available' ? 'active' : 'pending'}`}>{worker.availability}</span>
         </div>
       </div>
 
-      <div className="stats-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div style={{ padding: '14px 20px 0' }}>
+        <span className="chip">✓ e-Shram Verified</span>
+        <span className="chip">Cooperative Member</span>
+      </div>
+
+      <div className="stats-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: '14px' }}>
         <div className="stat">
           <b>⭐ {worker.rating?.average ? worker.rating.average.toFixed(1) : 'N/A'}</b>
           <small>{worker.rating?.count || 0} reviews</small>
@@ -68,12 +76,14 @@ function WorkerProfile() {
 
       {/* only cooperative admins can toggle verification — not the worker viewing their own profile */}
       {isAdminView && (
-        <button className="outline" style={{ width: 'auto', padding: '10px 16px', marginBottom: '20px' }} onClick={handleVerify}>
-          {worker.isVerified ? 'Unverify Worker' : '✓ Verify Worker'}
-        </button>
+        <div style={{ padding: '0 20px' }}>
+          <button className="outline" style={{ width: 'auto', padding: '10px 16px', marginBottom: '20px' }} onClick={handleVerify}>
+            {worker.isVerified ? 'Unverify Worker' : '✓ Verify Worker'}
+          </button>
+        </div>
       )}
 
-      <h2>Skills</h2>
+      <h2>Skills &amp; expertise</h2>
       <div className="card">
         {worker.skills.map((skill) => (
           <span key={skill} className="badge active" style={{ marginRight: '8px', marginBottom: '8px', display: 'inline-block' }}>
@@ -82,7 +92,7 @@ function WorkerProfile() {
         ))}
       </div>
 
-      <h2>Contact</h2>
+      <h2>Contact &amp; cooperative</h2>
       <div className="card">
         <p><strong>Phone:</strong> {worker.phone}</p>
         <p><strong>Email:</strong> {worker.email}</p>

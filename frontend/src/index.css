@@ -209,6 +209,7 @@ input:focus, select:focus {
   gap: 14px;
   flex-wrap: wrap;
 }
+
 .list-item-main {
   display: flex;
   flex-direction: column;
@@ -227,6 +228,7 @@ input:focus, select:focus {
   gap: 10px;
   flex-wrap: wrap;
 }
+
 
 @media (min-width: 900px) {
   .auth-page { max-width: 480px; }
@@ -248,3 +250,4 @@ input:focus, select:focus {
   background: #eef7f0; color: #1f9d55; font-size: 10px; font-weight: 800;
   padding: 5px 10px; border-radius: 20px; margin-right: 6px;
 }
+
